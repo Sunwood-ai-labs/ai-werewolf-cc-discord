@@ -18,6 +18,7 @@ load_dotenv()
 TOKEN = os.environ.get('GAME_MASTER_TOKEN', os.environ.get('DISCORD_TOKEN'))
 GUILD_ID = int(os.environ['GUILD_ID'])
 AGENT_COUNT = int(os.environ.get('AGENT_COUNT', 6))
+GAME_COUNT = int(os.environ.get('GAME_COUNT', 1))
 
 
 class GameMasterBot(discord.Client):
@@ -34,14 +35,10 @@ class GameMasterBot(discord.Client):
         self.channel_manager: Optional[ChannelManager] = None
         self.agent_discord_ids: Dict[str, int] = {}  # agent_id -> discord_id
 
-    async def setup_hook(self):
-        """Bot 起動時のセットアップ"""
-        # 起動待機
-        await self.wait_until_ready()
-        print(f"✓ Game Master Bot が起動しました: {self.user}")
-
     async def on_ready(self):
         """Bot 準備完了"""
+        print(f"✓ Game Master Bot が起動しました: {self.user}")
+
         guild = self.get_guild(GUILD_ID)
         if not guild:
             print(f"✗ Guild {GUILD_ID} が見つかりません")
@@ -51,6 +48,16 @@ class GameMasterBot(discord.Client):
 
         self.channel_manager = ChannelManager(guild)
         self.role_manager = RoleManager(self.game_state)
+
+        # ゲームを自動開始
+        agent_ids = [f"agent-{i}" for i in range(1, AGENT_COUNT + 1)]
+        print(f"✓ ゲームを開始します: {', '.join(agent_ids)}")
+        success = await self.start_game(agent_ids)
+
+        if success:
+            print("✓ ゲームが正常に開始されました")
+        else:
+            print("✗ ゲームの開始に失敗しました")
 
     async def on_message(self, message: discord.Message):
         """メッセージ受信"""
@@ -129,21 +136,97 @@ class GameMasterBot(discord.Client):
 
     # ========== ゲーム管理コマンド ==========
 
+    async def get_bot_user_id(self, token: str) -> Optional[int]:
+        """Bot トークンからユーザー ID を取得"""
+        try:
+            intents = discord.Intents.default()
+            bot_client = discord.Client(intents=intents)
+
+            result_id = None
+            ready_event = asyncio.Event()
+            close_event = asyncio.Event()
+
+            @bot_client.event
+            async def on_ready():
+                nonlocal result_id
+                result_id = bot_client.user.id
+                ready_event.set()
+                # 少し待ってからクローズ
+                await asyncio.sleep(0.5)
+                await bot_client.close()
+                close_event.set()
+
+            # タイムアウト付きで起動
+            await asyncio.wait_for(bot_client.start(token), timeout=30)
+
+            # on_ready が完了するのを待つ
+            await asyncio.wait_for(ready_event.wait(), timeout=10)
+            await asyncio.wait_for(close_event.wait(), timeout=5)
+
+            return result_id
+
+        except asyncio.TimeoutError:
+            print(f"  ⚠️ Bot ID の取得がタイムアウトしました")
+            return None
+        except Exception as e:
+            print(f"  ⚠️ Bot ID の取得に失敗: {e}")
+            return None
+
     async def start_game(self, agent_ids: list[str]):
         """ゲームを開始"""
         if self.game_state.phase != Phase.SETUP:
             return False
 
-        # プレイヤーを登録
+        # プレイヤーを登録（並列で Discord ID を取得）
+        tasks = []
         for agent_id in agent_ids:
-            # Discord ID を取得（ここでは仮実装）
-            discord_id = int(hash(agent_id)) % 1000000000  # 仮の ID
-            self.game_state.add_player(agent_id, discord_id)
-            self.agent_discord_ids[agent_id] = discord_id
+            # Discord ID を環境変数から取得（なければトークンから取得）
+            env_key = f"AGENT_{agent_id.split('-')[1].upper()}_DISCORD_ID"
+            discord_id_str = os.environ.get(env_key)
+
+            if discord_id_str:
+                discord_id = int(discord_id_str)
+                print(f"✓ {agent_id}: Discord ID を環境変数から取得: {discord_id}")
+                self.game_state.add_player(agent_id, discord_id)
+                self.agent_discord_ids[agent_id] = discord_id
+            else:
+                # トークンから Bot のユーザー ID を取得
+                token_key = f"AGENT_{agent_id.split('-')[1].upper()}_TOKEN"
+                token = os.environ.get(token_key)
+
+                if not token:
+                    print(f"⚠️ {token_key} が設定されていません")
+                    return False
+
+                # 非同期タスクとして実行
+                async def get_and_add(agent_id, token):
+                    discord_id = await self.get_bot_user_id(token)
+                    if not discord_id:
+                        print(f"⚠️ {agent_id} の Discord ID が取得できません")
+                        return None, None
+                    print(f"✓ {agent_id}: Discord ID をトークンから取得: {discord_id}")
+                    self.game_state.add_player(agent_id, discord_id)
+                    self.agent_discord_ids[agent_id] = discord_id
+                    return agent_id, discord_id
+
+                tasks.append(get_and_add(agent_id, token))
+
+        # 並列実行
+        if tasks:
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for result in results:
+                if isinstance(result, Exception):
+                    print(f"⚠️ Discord ID 取得中にエラーが発生: {result}")
+                    return False
+                elif result and result[0] is None:
+                    return False
 
         # 役職を割り当て
         if not self.role_manager.assign_roles(len(agent_ids)):
             return False
+
+        # ゲーム回数プレフィックス
+        game_count_prefix = f"【第{GAME_COUNT}回】"
 
         # 各プレイヤーに役職を通知
         for agent_id in agent_ids:
@@ -151,22 +234,33 @@ class GameMasterBot(discord.Client):
             if player and player.role:
                 role_desc = self.role_manager.get_role_description(player.role)
 
-                # 人狼の場合は仲間も通知
+                # 人狼の場合は仲間も通知（Discord Mention で表示）
                 if player.role == Role.WEREWOLF:
                     partners = self.role_manager.get_werewolf_partners(agent_id)
                     if partners:
-                        role_desc += f"\n\n仲間の人狼: {', '.join(partners)}"
+                        # Discord Mention に変換
+                        partner_mentions = []
+                        for partner_id in partners:
+                            partner_player = self.game_state.get_player(partner_id)
+                            if partner_player:
+                                partner_mentions.append(f"<@{partner_player.discord_id}>")
+                        role_desc += f"\n\n仲間の人狼: {', '.join(partner_mentions)}"
 
-                await self.channel_manager.send_to_dm_channel(agent_id, f"🎭 **あなたの役職**: {role_desc}")
+                # 区切り線付きで送信
+                dm_message = f"{game_count_prefix} {'=' * 40}\n🎭 **あなたの役職**: {role_desc}\n{'=' * 40}"
+                await self.channel_manager.send_to_dm_channel(agent_id, dm_message)
 
         # 人狼に権限を付与
         werewolves = self.game_state.get_players_by_role(Role.WEREWOLF)
         await self.channel_manager.set_werewolf_role([p.agent_id for p in werewolves])
 
+        # ゲーム回数を表示（履歴管理）
+        game_count_prefix = f"【第{GAME_COUNT}回】"
+
         # ゲームを昼フェーズへ
         self.game_state.transition_to_day()
-        await self.channel_manager.send_to_village("☀️ **ゲーム開始！** 昼フェーズです。議論を開始してください。")
-        await self.channel_manager.send_to_game_log("🎮 ゲームが開始されました")
+        await self.channel_manager.send_to_village(f"{game_count_prefix} ☀️ **ゲーム開始！** 昼フェーズです。議論を開始してください。")
+        await self.channel_manager.send_to_game_log(f"{game_count_prefix} 🎮 ゲームが開始されました")
 
         return True
 
