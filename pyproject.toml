@@ -9,15 +9,16 @@ dependencies = [
     "click>=8.1.0",
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
+    "aiohttp>=3.9.0",
 ]
 
 [project.scripts]
-werewolf = "src.cli.main:cli"
-werewolf-gm = "src.gm.main:main"
-werewolf-setup = "src.setup.create_server:main"
+werewolf = "cli.main:cli"
+werewolf-gm = "gm.main:main"
+werewolf-setup = "setup.create_server:main"
 
 [tool.setuptools]
-package-dir = {"" = "."}
+package-dir = {"" = "src"}
 
 [dependency-groups]
 dev = [

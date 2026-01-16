@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from .game_state import GameState, Phase, Player, Role, NightAction
 from .role_manager import RoleManager
 from .channel_manager import ChannelManager
+from ..utils.discord_utils import get_bot_user_id
 
 load_dotenv()
 
@@ -135,42 +136,6 @@ class GameMasterBot(discord.Client):
                 await message.channel.send(f"🐺 襲撃失敗: {reason}")
 
     # ========== ゲーム管理コマンド ==========
-
-    async def get_bot_user_id(self, token: str) -> Optional[int]:
-        """Bot トークンからユーザー ID を取得"""
-        try:
-            intents = discord.Intents.default()
-            bot_client = discord.Client(intents=intents)
-
-            result_id = None
-            ready_event = asyncio.Event()
-            close_event = asyncio.Event()
-
-            @bot_client.event
-            async def on_ready():
-                nonlocal result_id
-                result_id = bot_client.user.id
-                ready_event.set()
-                # 少し待ってからクローズ
-                await asyncio.sleep(0.5)
-                await bot_client.close()
-                close_event.set()
-
-            # タイムアウト付きで起動
-            await asyncio.wait_for(bot_client.start(token), timeout=30)
-
-            # on_ready が完了するのを待つ
-            await asyncio.wait_for(ready_event.wait(), timeout=10)
-            await asyncio.wait_for(close_event.wait(), timeout=5)
-
-            return result_id
-
-        except asyncio.TimeoutError:
-            print(f"  ⚠️ Bot ID の取得がタイムアウトしました")
-            return None
-        except Exception as e:
-            print(f"  ⚠️ Bot ID の取得に失敗: {e}")
-            return None
 
     async def start_game(self, agent_ids: list[str]):
         """ゲームを開始"""

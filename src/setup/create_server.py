@@ -12,6 +12,8 @@ import shutil
 from pathlib import Path
 from dotenv import load_dotenv
 
+from ..utils.discord_utils import get_bot_user_id
+
 load_dotenv()
 
 OWNER_TOKEN = os.environ.get('OWNER_DISCORD_TOKEN') or os.environ.get('GAME_MASTER_TOKEN')
@@ -142,30 +144,33 @@ AGENT_ID={agent_id}
             print(f"  ⚠️  CLAUDE.md not found at {source_claude_md}")
 
         # ========== .claude ディレクトリを複製 ==========
-        # （現在はスキップしています。必要な場合は有効化してください）
-        # claude_dir = agent_dir / ".claude"
-        # source_claude_dir = project_root / "agents/agent_1/.claude"
-        #
-        # if source_claude_dir.exists():
-        #     if claude_dir.exists():
-        #         # 既存の場合は中身を更新
-        #         shutil.rmtree(claude_dir)
-        #     shutil.copytree(source_claude_dir, claude_dir)
-        #
-        #     # CLAUDE.md の中身をエージェントIDに合わせて更新
-        #     claude_md = claude_dir / "CLAUDE.md"
-        #     if claude_md.exists():
-        #         content = claude_md.read_text()
-        #         # エージェントIDを置換
-        #         content = content.replace("${AGENT_ID}", agent_id)
-        #         claude_md.write_text(content)
-        #
-        #     print(f"  ✓ Created agents/agent_{i}/.claude/")
-        # else:
-        #     if skip_missing_claude:
-        #         print(f"  ⏭️  Skipping .claude directory (not found at {source_claude_dir})")
-        #     else:
-        #         print(f"  ⚠️  Source .claude directory not found at {source_claude_dir}")
+        # 既存のエージェント固有のペルソナ設定を保持するため、
+        # 各エージェントの .claude ディレクトリから複製します
+
+        claude_dir = agent_dir / ".claude"
+        source_claude_dir = project_root / f"agents/agent_{i}/.claude"
+
+        if claude_dir.exists():
+            # 既存の場合はスキップ（各エージェントの固有設定を保持）
+            print(f"  ⏭️  Skipping agents/agent_{i}/.claude/ (already exists, preserving persona)")
+        elif source_claude_dir.exists():
+            # ソースが存在する場合は複製
+            shutil.copytree(source_claude_dir, claude_dir)
+
+            # CLAUDE.md の中身をエージェントIDに合わせて更新
+            claude_md = claude_dir / "CLAUDE.md"
+            if claude_md.exists():
+                content = claude_md.read_text()
+                # エージェントIDを置換
+                content = content.replace("${AGENT_ID}", agent_id)
+                claude_md.write_text(content)
+
+            print(f"  ✓ Created agents/agent_{i}/.claude/")
+        else:
+            if skip_missing_claude:
+                print(f"  ⏭️  Skipping .claude directory (not found at {source_claude_dir})")
+            else:
+                print(f"  ⚠️  Source .claude directory not found at {source_claude_dir}")
 
 
 async def setup_server():
@@ -316,41 +321,23 @@ async def setup_server():
         # ========== 3. Bot にロールを付与 ==========
         print("\n🔐 Assigning roles to bots...")
 
-        # 各 Bot のユーザー ID を取得（トークンから Bot 情報を取得）
+        # 各 Bot のユーザー ID を取得（HTTP API経由で安全に取得）
         bot_ids = {}
 
         # GM Bot
         gm_token = os.environ.get('GAME_MASTER_TOKEN')
         if gm_token and gm_token != "your_gm_bot_token_here":
-            try:
-                gm_intents = discord.Intents.default()
-                gm_client = discord.Client(intents=gm_intents)
-
-                @gm_client.event
-                async def on_ready():
-                    bot_ids['gm'] = gm_client.user.id
-                    await gm_client.close()
-
-                await gm_client.start(gm_token)
-            except Exception as e:
-                print(f"  ⚠️  GM Bot の取得に失敗: {e}")
+            gm_id = await get_bot_user_id(gm_token)
+            if gm_id:
+                bot_ids['gm'] = gm_id
 
         # Agent Bots
         for i in range(1, AGENT_COUNT + 1):
             agent_token = os.environ.get(f'AGENT_{i}_TOKEN')
             if agent_token and agent_token != f"your_agent{i}_bot_token_here":
-                try:
-                    agent_intents = discord.Intents.default()
-                    agent_client = discord.Client(intents=agent_intents)
-
-                    @agent_client.event
-                    async def on_ready():
-                        bot_ids[f'agent-{i}'] = agent_client.user.id
-                        await agent_client.close()
-
-                    await agent_client.start(agent_token)
-                except Exception as e:
-                    print(f"  ⚠️  Agent {i} の取得に失敗: {e}")
+                agent_id = await get_bot_user_id(agent_token)
+                if agent_id:
+                    bot_ids[f'agent-{i}'] = agent_id
 
         # ロールを付与
         # GM Bot
