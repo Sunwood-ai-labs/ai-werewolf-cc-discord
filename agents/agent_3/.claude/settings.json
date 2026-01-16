@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "python3 /ai-werewolf/ai-werewolf-cc-discord/hooks/keep_going.py"
+      }]
+    }]
+  }
+}
