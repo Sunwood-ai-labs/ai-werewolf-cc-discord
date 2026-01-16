@@ -66,6 +66,17 @@ class GameState:
     phase_time_limit: PhaseTimeLimit = field(default_factory=PhaseTimeLimit)
     current_sub_phase: str = "discussion"  # "discussion" or "voting" for day phase
 
+    @classmethod
+    def with_custom_time_limits(cls, day_discussion: int = 60, day_voting: int = 30, night: int = 30):
+        """カスタム時間制限で GameState を作成"""
+        return cls(
+            phase_time_limit=PhaseTimeLimit(
+                day_discussion=day_discussion,
+                day_voting=day_voting,
+                night=night
+            )
+        )
+
     def get_phase_time_limit_seconds(self) -> int:
         """現在のフェーズの時間制限（秒）を取得"""
         if self.phase == Phase.DAY:

@@ -79,6 +79,16 @@ load_dotenv()
 TOKEN = os.environ.get('GAME_MASTER_TOKEN', os.environ.get('DISCORD_TOKEN'))
 GUILD_ID = int(os.environ['GUILD_ID'])
 AGENT_COUNT = int(os.environ.get('AGENT_COUNT', 6))
+
+# フェーズ時間設定（秒）
+DAY_DISCUSSION_TIME = int(os.environ.get('DAY_DISCUSSION_TIME', 60))
+DAY_VOTING_TIME = int(os.environ.get('DAY_VOTING_TIME', 30))
+NIGHT_TIME = int(os.environ.get('NIGHT_TIME', 30))
+
+# ランダム脱落設定
+RANDOM_ELIMINATION_ENABLED = os.environ.get('RANDOM_ELIMINATION_ENABLED', 'false').lower() == 'true'
+RANDOM_ELIMINATION_CHANCE = int(os.environ.get('RANDOM_ELIMINATION_CHANCE', 50))
+
 # ゲーム回数は前回の回数を読み込んで+1して今回の回数にする
 GAME_COUNT = load_game_count() + 1
 # 保存して、次回起動時もこの回数をベースに+1されるようにする
@@ -94,13 +104,20 @@ class GameMasterBot(discord.Client):
         intents.members = True
         super().__init__(intents=intents, *args, **kwargs)
 
-        self.game_state = GameState()
+        # 環境変数から時間設定を取得して GameState を初期化
+        self.game_state = GameState.with_custom_time_limits(
+            day_discussion=DAY_DISCUSSION_TIME,
+            day_voting=DAY_VOTING_TIME,
+            night=NIGHT_TIME
+        )
         self.role_manager: Optional[RoleManager] = None
         self.channel_manager: Optional[ChannelManager] = None
         self.agent_discord_ids: Dict[str, int] = {}  # agent_id -> discord_id
         self.timer_task: Optional[asyncio.Task] = None  # バックグラウンドタイマータスク
         self.timer_stopped = False  # タイマー停止フラグ
         self.last_announced_time: Optional[int] = None  # 最後にアナウンスした残り時間
+        self.random_elimination_enabled = RANDOM_ELIMINATION_ENABLED
+        self.random_elimination_chance = RANDOM_ELIMINATION_CHANCE
 
     async def on_ready(self):
         """Bot 準備完了"""
@@ -149,18 +166,31 @@ class GameMasterBot(discord.Client):
 
                 # 残り時間アナウンス
                 if remaining != self.last_announced_time and remaining in announcement_times:
-                    phase_name = ""
                     if self.game_state.phase == Phase.DAY:
+                        # 昼フェーズ：villageチャンネルに通知（既存機能を維持）
+                        phase_name = ""
                         if self.game_state.current_sub_phase == "discussion":
                             phase_name = "議論"
                         elif self.game_state.current_sub_phase == "voting":
                             phase_name = "投票"
-                    elif self.game_state.phase == Phase.NIGHT:
-                        phase_name = "夜"
 
-                    if phase_name:
-                        await self.channel_manager.send_to_village(f"⏰ {phase_name}残り{remaining}秒！")
-                        await self.channel_manager.send_to_game_log(f"⏰ {phase_name}残り{remaining}秒をアナウンス")
+                        if phase_name:
+                            await self.channel_manager.send_to_village(f"⏰ {phase_name}残り{remaining}秒！")
+                            await self.channel_manager.send_to_game_log(f"⏰ {phase_name}残り{remaining}秒をアナウンス")
+
+                    elif self.game_state.phase == Phase.NIGHT:
+                        # 夜フェーズ：各能力者に個別DM通知
+                        await self._send_timer_notification_to_role_players(
+                            Role.SEER, remaining, "🔮", "占い"
+                        )
+                        await self._send_timer_notification_to_role_players(
+                            Role.KNIGHT, remaining, "🛡️", "護衛"
+                        )
+                        await self._send_timer_notification_to_role_players(
+                            Role.WEREWOLF, remaining, "🐺", "襲撃"
+                        )
+                        await self.channel_manager.send_to_game_log(f"⏰ 夜残り{remaining}秒をアナウンス")
+
                     self.last_announced_time = remaining
 
                 # 時間切れチェック
@@ -285,6 +315,30 @@ class GameMasterBot(discord.Client):
                 await message.channel.send(f"🐺 {reason}")
             else:
                 await message.channel.send(f"🐺 襲撃失敗: {reason}")
+
+    async def _send_timer_notification_to_role_players(
+        self,
+        role: Role,
+        remaining: int,
+        icon: str,
+        action_name: str
+    ):
+        """
+        特定の役職のプレイヤーにタイマー通知を送信
+
+        Args:
+            role: 対象役職（Role.SEER, Role.KNIGHT, Role.WEREWOLF）
+            remaining: 残り時間（秒）
+            icon: 絵文字（"🔮", "🛡️", "🐺"）
+            action_name: アクション名（"占い", "護衛", "襲撃"）
+        """
+        players = self.game_state.get_players_by_role(role)
+        for player in players:
+            if player.is_alive:
+                await self.channel_manager.send_to_dm_channel(
+                    player.agent_id,
+                    f"{icon} {action_name}残り{remaining}秒！"
+                )
 
     # ========== ゲーム管理コマンド ==========
 
@@ -484,7 +538,41 @@ class GameMasterBot(discord.Client):
         most_voted = self.game_state.get_most_voted_player()
 
         if not results:
-            await self.channel_manager.send_to_village("📊 投票結果: 誰も投票しませんでした")
+            # 投票なしの場合、ランダム脱落システムを判定
+            import random
+
+            if self.random_elimination_enabled:
+                # 生存プレイヤーを取得
+                alive_players = self.game_state.get_alive_players()
+
+                if len(alive_players) > 1:
+                    # 確率でランダム脱落
+                    if random.randint(1, 100) <= self.random_elimination_chance:
+                        eliminated_player = random.choice(alive_players)
+                        eliminated_id = eliminated_player.agent_id
+
+                        await self.channel_manager.send_to_village(
+                            f"📊 投票結果: 誰も投票しませんでした\n"
+                            f"🎲 運命の選択... **{eliminated_id}** が randomly 脱落しました！"
+                        )
+
+                        # プレイヤーを死亡
+                        eliminated_player.is_alive = False
+                        await self.channel_manager.eliminate_player(eliminated_player.discord_id)
+                        await self.channel_manager.send_to_graveyard(f"👻 {eliminated_id} が運命に選ばれ、霊界に来ました")
+
+                        # 勝利条件チェック
+                        winner = self.game_state.check_win_condition()
+                        if winner:
+                            await self.end_game(winner)
+                            return True
+                        return True
+                    else:
+                        await self.channel_manager.send_to_village("📊 投票結果: 誰も投票しませんでした\n🎲 運命の選別... 今回は誰も脱落しませんでした")
+                else:
+                    await self.channel_manager.send_to_village("📊 投票結果: 誰も投票しませんでした\n（生存プレイヤーが1人以下のため、ランダム脱落はありません）")
+            else:
+                await self.channel_manager.send_to_village("📊 投票結果: 誰も投票しませんでした")
         elif most_voted is None:
             # 同数の場合
             await self.channel_manager.send_to_village(f"📊 投票結果: 同票で決着がつきませんでした\n{', '.join([f'{k}: {v}票' for k, v in results.items()])}")
