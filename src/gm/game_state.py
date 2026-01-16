@@ -65,7 +65,7 @@ class GameState:
         return [p for p in self.players.values() if p.is_alive]
 
     def get_players_by_role(self, role: Role) -> List[Player]:
-    """特定の役職のプレイヤーを取得"""
+        """特定の役職のプレイヤーを取得"""
         return [p for p in self.players.values() if p.role == role]
 
     def count_werewolves(self) -> int:
