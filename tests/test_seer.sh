@@ -19,6 +19,7 @@ log() { echo -e "${BLUE}[$(date '+%H:%M:%S')]${NC} $1"; }
 log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
 log_error() { echo -e "${RED}[✗]${NC} $1"; }
 log_info() { echo -e "${CYAN}[i]${NC} $1"; }
+log_warning() { echo -e "${YELLOW}[!]${NC} $1"; }
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 AGENTS_DIR="$PROJECT_ROOT/agents"
@@ -27,6 +28,24 @@ echo ""
 log "════════════════════════════════════════════════════════════"
 log "👁️ 占い師テスト"
 log "════════════════════════════════════════════════════════════"
+echo ""
+
+# 事前チェック
+log "🔍 事前チェック..."
+
+# エージェントの.envが設定されているか確認
+if [ ! -f "$AGENTS_DIR/agent_1/.env" ]; then
+    log_warning "agent_1/.env が見つかりません"
+    log ""
+    log_info "各エージェントの .env を設定してください:"
+    log "  cp agents/agent_1/.env.example agents/agent_1/.env"
+    log "  vim agents/agent_1/.env"
+    log ""
+    log_error "テストを中止します"
+    exit 1
+fi
+
+log_success "エージェントの.env設定を確認しました"
 echo ""
 
 log "📋 テスト内容:"
@@ -42,7 +61,13 @@ log "🔍 ステップ1: 占い師エージェントを特定..."
 seer_agent=""
 
 for i in {1..6}; do
+    # whoami で役職を確認
     output=$(cd "$AGENTS_DIR/agent_$i" && uv run werewolf whoami 2>/dev/null || true)
+
+    # デバッグ用に出力を表示
+    if [ -n "$output" ]; then
+        echo "$output" | head -5
+    fi
 
     if echo "$output" | grep -qi "占い師\|seer"; then
         seer_agent="agent_$i"
@@ -52,7 +77,16 @@ for i in {1..6}; do
 done
 
 if [ -z "$seer_agent" ]; then
+    echo ""
     log_error "占い師が見つかりませんでした"
+    echo ""
+    log_info "考えられる原因:"
+    log "  1. ゲームがまだ開始されていない"
+    log "  2. エージェントの.env設定が不正"
+    log "  3. GM Botが起動していない"
+    echo ""
+    log_info "確認コマンド:"
+    log "  cd agents/agent_1 && uv run werewolf whoami"
     exit 1
 fi
 
@@ -105,7 +139,16 @@ log "🔮 ステップ4: 占いを実行..."
 
 log "$seer_agent → $target_agent を占います"
 
-(cd "$AGENTS_DIR/$seer_agent" && uv run werewolf dm "占い: $target_agent" 2>&1 || true)
+result=$(cd "$AGENTS_DIR/$seer_agent" && uv run werewolf dm "占い: $target_agent" 2>&1 || true)
+
+echo "$result"
+
+if echo "$result" | grep -q "✅\|成功\|占います"; then
+    log_success "占いコマンド送信成功"
+elif echo "$result" | grep -q "⚠️\|エラー\|失敗"; then
+    log_error "占いコマンド送信失敗"
+    exit 1
+fi
 
 echo ""
 log "⏳ 3秒間待機してDMを確認..."
