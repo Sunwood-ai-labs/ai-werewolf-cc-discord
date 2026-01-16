@@ -16,8 +16,13 @@ werewolf = "src.cli.main:cli"
 werewolf-gm = "src.gm.main:main"
 werewolf-setup = "src.setup.create_server:main"
 
-[tool.uv]
-package = true
-dev-dependencies = [
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[dependency-groups]
+dev = [
     "pytest>=8.0.0",
 ]
+
+[tool.uv]
+package = true
