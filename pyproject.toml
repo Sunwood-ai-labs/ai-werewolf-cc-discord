@@ -1,0 +1,23 @@
+[project]
+name = "werewolf-discord-agents"
+version = "0.1.0"
+description = "AI Werewolf Game with Claude Code Agents on Discord"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "discord.py>=2.3.0",
+    "click>=8.1.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+werewolf = "src.cli.main:cli"
+werewolf-gm = "src.gm.main:main"
+werewolf-setup = "src.setup.create_server:main"
+
+[tool.uv]
+package = true
+dev-dependencies = [
+    "pytest>=8.0.0",
+]
