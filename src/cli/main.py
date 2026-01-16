@@ -19,7 +19,8 @@ from rich.table import Table
 from rich.panel import Panel
 from dotenv import load_dotenv
 
-load_dotenv()
+# カレントディレクトリの .env を確実に読み込む
+load_dotenv(dotenv_path=os.path.join(os.getcwd(), '.env'))
 
 TOKEN = os.environ['DISCORD_TOKEN']
 GUILD_ID = int(os.environ['GUILD_ID'])
