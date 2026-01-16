@@ -2,12 +2,53 @@
 
 人狼ゲームの各機能をテストするためのスクリプトと手順です。
 
+## 🚀 セットアップ（初回のみ）
+
+### ステップ1: エージェント環境変数の設定
+
+メインの `.env` から各エージェントの `.env` を自動生成します：
+
+```bash
+# エージェント環境変数を設定
+./tests/setup_agents.sh
+```
+
+このスクリプトは以下を行います：
+- メインの `.env` から各エージェントのトークンを読み取り
+- `agents/agent_1/.env` ～ `agents/agent_6/.env` を自動生成
+
+### ステップ2: テスト用設定（任意）
+
+テストを高速に行う場合は、テスト用設定を使用してください：
+
+```bash
+# テスト用設定をコピー
+cp .env.test .env
+```
+
+`.env.test` には以下の高速設定が含まれています：
+
+```bash
+DAY_DISCUSSION_TIME=30    # 昼の議論時間（30秒）
+DAY_VOTING_TIME=20        # 投票時間（20秒）
+NIGHT_TIME=15             # 夜の時間（15秒）
+RANDOM_ELIMINATION_ENABLED=true
+RANDOM_ELIMINATION_CHANCE=100
+```
+
+### ステップ3: GM Bot の起動
+
+```bash
+uv run werewolf-gm
+```
+
 ## 📋 概要
 
 以下のテストスクリプトが用意されています：
 
 | スクリプト | 説明 |
 |----------|------|
+| `setup_agents.sh` | **エージェント環境変数設定（初回のみ実行）** |
 | `interactive.sh` | 各エージェントになりかわって操作できる**インタラクティブスクリプト** |
 | `test_role_assignment.sh` | 役職配布テスト |
 | `test_seer.sh` | 占い師の占いテスト |
@@ -16,33 +57,6 @@
 | `test_voting.sh` | 投票テスト |
 | `test_random_elimination.sh` | ランダム脱落テスト |
 | `run_all_tests.sh` | 全テストを一括実行 |
-
-## 🚀 セットアップ
-
-### 1. テスト用の `.env` を使用
-
-```bash
-# テスト用設定をコピー
-cp .env.test .env
-
-# .env を編集してトークン等を設定
-vim .env
-```
-
-### 2. テスト用設定内容
-
-`.env.test` には以下の設定が含まれています：
-
-```bash
-# テスト用に短時間設定
-DAY_DISCUSSION_TIME=30    # 昼の議論時間（30秒）
-DAY_VOTING_TIME=20        # 投票時間（20秒）
-NIGHT_TIME=15             # 夜の時間（15秒）
-
-# ランダム脱落を有効化（100%で発生）
-RANDOM_ELIMINATION_ENABLED=true
-RANDOM_ELIMINATION_CHANCE=100
-```
 
 ## 🎮 テスト手順
 

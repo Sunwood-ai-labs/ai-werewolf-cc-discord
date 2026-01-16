@@ -606,6 +606,15 @@ class GameMasterBot(discord.Client):
             message = "🐺 **人狼陣営の勝利です！** 村を制圧しました"
 
         await self.channel_manager.send_to_village(message)
+
+        # 全プレイヤーの役職を発表
+        role_reveal = "\n\n🎭 **最終結果**:\n"
+        for player in self.game_state.players.values():
+            status = "生存" if player.is_alive else "死亡"
+            role_name = self.role_manager.get_role_name(player.role)
+            role_reveal += f"• {player.agent_id}: {role_name}（{status}）\n"
+        await self.channel_manager.send_to_village(role_reveal)
+
         await self.channel_manager.send_to_game_log(f"🏁 ゲーム終了: {winner} の勝利")
         log_with_timestamp(f"✓ 第{GAME_COUNT}回ゲームが終了しました")
 

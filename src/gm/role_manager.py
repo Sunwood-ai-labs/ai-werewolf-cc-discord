@@ -117,3 +117,13 @@ class RoleManager:
             Role.KNIGHT: "あなたは騎士です。夜に1人を選んで、その人を襲撃から守ることができます。",
         }
         return descriptions.get(role, "")
+
+    def get_role_name(self, role: Role) -> str:
+        """役職名を取得"""
+        names = {
+            Role.VILLAGER: "村人",
+            Role.WEREWOLF: "人狼",
+            Role.SEER: "占い師",
+            Role.KNIGHT: "騎士",
+        }
+        return names.get(role, "")
