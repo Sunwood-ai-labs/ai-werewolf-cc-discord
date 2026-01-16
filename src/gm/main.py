@@ -6,20 +6,83 @@ import discord
 import asyncio
 import os
 import re
+import json
+from pathlib import Path
 from typing import Dict, Optional
+from datetime import datetime
 from dotenv import load_dotenv
 
 from .game_state import GameState, Phase, Player, Role, NightAction
 from .role_manager import RoleManager
 from .channel_manager import ChannelManager
-from ..utils.discord_utils import get_bot_user_id
+
+
+# ゲーム回数管理用ファイル
+GAME_STATE_FILE = Path(__file__).parent.parent.parent / ".game_state.json"
+
+
+def log_with_timestamp(message: str):
+    """タイムスタンプ付きでログを出力"""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}")
+
+
+def load_game_count() -> int:
+    """ゲーム回数をファイルから読み込む"""
+    if GAME_STATE_FILE.exists():
+        try:
+            with open(GAME_STATE_FILE, 'r') as f:
+                data = json.load(f)
+                count = data.get('game_count', 1)
+                log_with_timestamp(f"✓ ゲーム回数を読み込みました: {count}")
+                return count
+        except Exception as e:
+            log_with_timestamp(f"⚠️ ゲーム回数の読み込みに失敗: {e}")
+    else:
+        # ファイルがなければ初期値で作成
+        log_with_timestamp("📝 ゲーム回数ファイルを初期化します")
+        save_game_count(1)
+    return 1
+
+
+def save_game_count(count: int):
+    """ゲーム回数をファイルに保存"""
+    try:
+        GAME_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(GAME_STATE_FILE, 'w') as f:
+            json.dump({'game_count': count}, f, indent=2)
+    except Exception as e:
+        log_with_timestamp(f"⚠️ ゲーム回数の保存に失敗: {e}")
+
+
+async def get_bot_user_id(token: str):
+    """BotトークンからユーザーIDを取得 (HTTP API経由)"""
+    import aiohttp
+    url = "https://discord.com/api/v10/users/@me"
+    headers = {"Authorization": f"Bot {token}"}
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return int(data['id'])
+                else:
+                    print(f"  ⚠️ Bot ID の取得に失敗: Status {response.status}")
+                    return None
+    except Exception as e:
+        print(f"  ⚠️ Bot ID の取得中にHTTPエラーが発生: {e}")
+        return None
 
 load_dotenv()
 
 TOKEN = os.environ.get('GAME_MASTER_TOKEN', os.environ.get('DISCORD_TOKEN'))
 GUILD_ID = int(os.environ['GUILD_ID'])
 AGENT_COUNT = int(os.environ.get('AGENT_COUNT', 6))
-GAME_COUNT = int(os.environ.get('GAME_COUNT', 1))
+# ゲーム回数は前回の回数を読み込んで+1して今回の回数にする
+GAME_COUNT = load_game_count() + 1
+# 保存して、次回起動時もこの回数をベースに+1されるようにする
+save_game_count(GAME_COUNT)
 
 
 class GameMasterBot(discord.Client):
@@ -35,30 +98,103 @@ class GameMasterBot(discord.Client):
         self.role_manager: Optional[RoleManager] = None
         self.channel_manager: Optional[ChannelManager] = None
         self.agent_discord_ids: Dict[str, int] = {}  # agent_id -> discord_id
+        self.timer_task: Optional[asyncio.Task] = None  # バックグラウンドタイマータスク
+        self.timer_stopped = False  # タイマー停止フラグ
+        self.last_announced_time: Optional[int] = None  # 最後にアナウンスした残り時間
 
     async def on_ready(self):
         """Bot 準備完了"""
-        print(f"✓ Game Master Bot が起動しました: {self.user}")
+        log_with_timestamp(f"✓ Game Master Bot が起動しました: {self.user}")
 
         guild = self.get_guild(GUILD_ID)
         if not guild:
-            print(f"✗ Guild {GUILD_ID} が見つかりません")
+            log_with_timestamp(f"✗ Guild {GUILD_ID} が見つかりません")
             return
 
-        print(f"✓ サーバーに接続: {guild.name}")
+        log_with_timestamp(f"✓ サーバーに接続: {guild.name}")
 
         self.channel_manager = ChannelManager(guild)
         self.role_manager = RoleManager(self.game_state)
 
         # ゲームを自動開始
         agent_ids = [f"agent-{i}" for i in range(1, AGENT_COUNT + 1)]
-        print(f"✓ ゲームを開始します: {', '.join(agent_ids)}")
+        log_with_timestamp(f"✓ ゲームを開始します: {', '.join(agent_ids)}")
         success = await self.start_game(agent_ids)
 
         if success:
-            print("✓ ゲームが正常に開始されました")
+            log_with_timestamp("✓ ゲームが正常に開始されました")
         else:
-            print("✗ ゲームの開始に失敗しました")
+            log_with_timestamp("✗ ゲームの開始に失敗しました")
+
+        # バックグラウンドタイマーを開始
+        self.timer_stopped = False
+        self.timer_task = self.loop.create_task(self._background_timer())
+
+    async def _background_timer(self):
+        """バックグラウンドで動作するタイマータスク"""
+        log_with_timestamp("⏱️ タイマーを開始しました")
+
+        # アナウンスする残り時間（秒）
+        announcement_times = [60, 30, 15, 10, 5, 3, 2, 1]
+
+        while not self.timer_stopped:
+            try:
+                # ゲーム中でなければスキップ
+                if self.game_state.phase == Phase.SETUP or self.game_state.phase == Phase.GAME_OVER:
+                    await asyncio.sleep(1)
+                    continue
+
+                # 残り時間を取得
+                remaining = self.game_state.get_remaining_seconds()
+
+                # 残り時間アナウンス
+                if remaining != self.last_announced_time and remaining in announcement_times:
+                    phase_name = ""
+                    if self.game_state.phase == Phase.DAY:
+                        if self.game_state.current_sub_phase == "discussion":
+                            phase_name = "議論"
+                        elif self.game_state.current_sub_phase == "voting":
+                            phase_name = "投票"
+                    elif self.game_state.phase == Phase.NIGHT:
+                        phase_name = "夜"
+
+                    if phase_name:
+                        await self.channel_manager.send_to_village(f"⏰ {phase_name}残り{remaining}秒！")
+                        await self.channel_manager.send_to_game_log(f"⏰ {phase_name}残り{remaining}秒をアナウンス")
+                    self.last_announced_time = remaining
+
+                # 時間切れチェック
+                if self.game_state.is_phase_timeout():
+                    self.last_announced_time = None  # フェーズ変更時にリセット
+
+                    phase = self.game_state.phase
+                    sub_phase = self.game_state.current_sub_phase
+
+                    if phase == Phase.DAY:
+                        if sub_phase == "discussion":
+                            log_with_timestamp("⏰ 議論時間終了 - 投票フェーズへ移行")
+                            await self.start_voting_phase()
+                        elif sub_phase == "voting":
+                            log_with_timestamp("⏰ 投票時間終了 - 投票結果を集計")
+                            await self.process_voting_results()
+
+                            # 投票結果処理後、まだ昼なら夜へ移行
+                            if self.game_state.phase == Phase.DAY:
+                                log_with_timestamp("🌙 夜フェーズへ移行")
+                                await self.transition_to_night()
+
+                    elif phase == Phase.NIGHT:
+                        log_with_timestamp("⏰ 夜時間終了 - 昼フェーズへ移行")
+                        await self.transition_to_day()
+
+                await asyncio.sleep(1)  # 1秒ごとにチェック
+
+            except asyncio.CancelledError:
+                log_with_timestamp("⏱️ タイマーが停止しました")
+                break
+            except Exception as e:
+                log_with_timestamp(f"⚠️ タイマーでエラーが発生: {e}")
+                await asyncio.sleep(1)
 
     async def on_message(self, message: discord.Message):
         """メッセージ受信"""
@@ -118,9 +254,24 @@ class GameMasterBot(discord.Client):
                 await message.channel.send("⚠️ 投票は昼フェーズのみ使用できます")
                 return
 
+            if self.game_state.current_sub_phase != "voting":
+                await message.channel.send("⚠️ 投票フェーズではありません")
+                return
+
             target_id = content.split(":", 1)[1].strip()
-            # 投票処理（仮実装）
-            await message.channel.send(f"✅ {target_id} に投票しました")
+
+            # 投票処理
+            if self.game_state.cast_vote(agent_id, target_id):
+                await message.channel.send(f"✅ {target_id} に投票しました")
+
+                # 全員投票したかチェック
+                alive_count = len(self.game_state.get_alive_players())
+                voter_count = self.game_state.count_voters()
+
+                if voter_count >= alive_count:
+                    await message.channel.send(f"📊 全員の投票が揃いました（{voter_count}/{alive_count}）")
+            else:
+                await message.channel.send("⚠️ 投票に失敗しました")
 
         elif content.startswith("襲撃:"):
             if self.game_state.phase != Phase.NIGHT:
@@ -165,7 +316,7 @@ class GameMasterBot(discord.Client):
 
                 # 非同期タスクとして実行
                 async def get_and_add(agent_id, token):
-                    discord_id = await self.get_bot_user_id(token)
+                    discord_id = await get_bot_user_id(token)
                     if not discord_id:
                         print(f"⚠️ {agent_id} の Discord ID が取得できません")
                         return None, None
@@ -219,12 +370,20 @@ class GameMasterBot(discord.Client):
         werewolves = self.game_state.get_players_by_role(Role.WEREWOLF)
         await self.channel_manager.set_werewolf_role([p.agent_id for p in werewolves])
 
+        # 全プレイヤーに alive ロールを付与（villageチャンネルの書き込み権限のため）
+        await self.channel_manager.start_game(list(self.agent_discord_ids.values()))
+
         # ゲーム回数を表示（履歴管理）
         game_count_prefix = f"【第{GAME_COUNT}回】"
 
         # ゲームを昼フェーズへ
         self.game_state.transition_to_day()
-        await self.channel_manager.send_to_village(f"{game_count_prefix} ☀️ **ゲーム開始！** 昼フェーズです。議論を開始してください。")
+
+        # 残り時間を計算
+        remaining = self.game_state.get_remaining_seconds()
+        time_str = f"（残り{remaining}秒）"
+
+        await self.channel_manager.send_to_village(f"{game_count_prefix} ☀️ **ゲーム開始！** 昼フェーズです。議論を開始してください。{time_str}")
         await self.channel_manager.send_to_game_log(f"{game_count_prefix} 🎮 ゲームが開始されました")
 
         return True
@@ -236,20 +395,24 @@ class GameMasterBot(discord.Client):
 
         self.game_state.transition_to_night()
 
+        # 残り時間を計算
+        remaining = self.game_state.get_remaining_seconds()
+        time_str = f"（残り{remaining}秒）"
+
         # 村をロック
         await self.channel_manager.lock_village()
-        await self.channel_manager.send_to_village("🌙 **夜になりました**")
+        await self.channel_manager.send_to_village(f"🌙 **夜になりました**{time_str}")
 
         # 各能力者に通知
         for player in self.game_state.get_alive_players():
             if player.role == Role.SEER:
-                await self.channel_manager.send_to_dm_channel(player.agent_id, "🌙 夜です。占いたい相手を `占い: agent-X` の形式で指定してください")
+                await self.channel_manager.send_to_dm_channel(player.agent_id, f"🌙 夜です（残り{remaining}秒）。占いたい相手を `占い: agent-X` の形式で指定してください")
             elif player.role == Role.KNIGHT:
-                await self.channel_manager.send_to_dm_channel(player.agent_id, "🌙 夜です。護衛したい相手を `護衛: agent-X` の形式で指定してください")
+                await self.channel_manager.send_to_dm_channel(player.agent_id, f"🌙 夜です（残り{remaining}秒）。護衛したい相手を `護衛: agent-X` の形式で指定してください")
             elif player.role == Role.WEREWOLF:
-                await self.channel_manager.send_to_werewolf_room("🌙 夜です。襲撃対象を決めて `襲撃: agent-X` の形式で GM に送ってください")
+                await self.channel_manager.send_to_werewolf_room(f"🌙 夜です（残り{remaining}秒）。襲撃対象を決めて `襲撃: agent-X` の形式で GM に送ってください")
 
-        await self.channel_manager.send_to_game_log("🌙 夜フェーズに移行しました")
+        await self.channel_manager.send_to_game_log(f"🌙 夜フェーズに移行しました（残り{remaining}秒）")
 
         return True
 
@@ -260,19 +423,88 @@ class GameMasterBot(discord.Client):
 
         self.game_state.transition_to_day()
 
+        # 夜の結果処理：誰が死んだか確認
+        dead_players = [p for p in self.game_state.players.values() if not p.is_alive]
+
         # 村をアンロック
         await self.channel_manager.unlock_village()
-        await self.channel_manager.send_to_village(f"☀️ **{self.game_state.day_count}日目** です")
 
-        # 被害者を通知（ここでは仮実装）
-        await self.channel_manager.send_to_village("昨夜は誰も死亡しませんでした")
+        # 残り時間を計算
+        remaining = self.game_state.get_remaining_seconds()
+        time_str = f"（残り{remaining}秒）"
+
+        await self.channel_manager.send_to_village(f"☀️ **{self.game_state.day_count}日目** です{time_str}")
+
+        # 被害者を通知
+        if dead_players:
+            dead_names = [p.agent_id for p in dead_players]
+            await self.channel_manager.send_to_village(f"昨夜の被害者: {', '.join(dead_names)}")
+
+            # 死亡したプレイヤーを処理
+            for player in dead_players:
+                await self.channel_manager.eliminate_player(player.discord_id)
+                await self.channel_manager.send_to_graveyard(f"👻 {player.agent_id} が霊界に来ました")
+        else:
+            await self.channel_manager.send_to_village("昨夜は誰も死亡しませんでした")
+
+        # 夜の行動をリセット
+        self.role_manager.reset_night_actions()
 
         # 勝利条件チェック
         winner = self.game_state.check_win_condition()
         if winner:
             await self.end_game(winner)
+            return True
 
         await self.channel_manager.send_to_game_log(f"☀️ {self.game_state.day_count}日目に移行しました")
+
+        return True
+
+    async def start_voting_phase(self):
+        """投票フェーズを開始"""
+        if self.game_state.phase != Phase.DAY or self.game_state.current_sub_phase != "discussion":
+            return False
+
+        self.game_state.start_voting_phase()
+
+        # 残り時間を計算
+        remaining = self.game_state.get_remaining_seconds()
+
+        await self.channel_manager.send_to_village(f"📊 **投票フェーズ開始**（残り{remaining}秒）\nDMで `投票: agent-X` の形式で投票してください")
+        await self.channel_manager.send_to_game_log(f"📊 投票フェーズを開始しました（残り{remaining}秒）")
+
+        return True
+
+    async def process_voting_results(self):
+        """投票結果を処理して処刑を実行"""
+        if self.game_state.current_sub_phase != "voting":
+            return False
+
+        results = self.game_state.get_vote_results()
+        most_voted = self.game_state.get_most_voted_player()
+
+        if not results:
+            await self.channel_manager.send_to_village("📊 投票結果: 誰も投票しませんでした")
+        elif most_voted is None:
+            # 同数の場合
+            await self.channel_manager.send_to_village(f"📊 投票結果: 同票で決着がつきませんでした\n{', '.join([f'{k}: {v}票' for k, v in results.items()])}")
+        else:
+            # 処刑実行
+            votes = results[most_voted]
+            await self.channel_manager.send_to_village(f"📊 投票結果: **{most_voted}** が処刑されました（{votes}票）")
+
+            # プレイヤーを死亡
+            player = self.game_state.get_player(most_voted)
+            if player:
+                player.is_alive = False
+                await self.channel_manager.eliminate_player(player.discord_id)
+                await self.channel_manager.send_to_graveyard(f"👻 {most_voted} が処刑され、霊界に来ました")
+
+        # 勝利条件チェック
+        winner = self.game_state.check_win_condition()
+        if winner:
+            await self.end_game(winner)
+            return True
 
         return True
 
@@ -287,6 +519,18 @@ class GameMasterBot(discord.Client):
 
         await self.channel_manager.send_to_village(message)
         await self.channel_manager.send_to_game_log(f"🏁 ゲーム終了: {winner} の勝利")
+        log_with_timestamp(f"✓ 第{GAME_COUNT}回ゲームが終了しました")
+
+    async def close(self):
+        """Bot を閉じる時の処理"""
+        self.timer_stopped = True
+        if self.timer_task and not self.timer_task.done():
+            self.timer_task.cancel()
+            try:
+                await self.timer_task
+            except asyncio.CancelledError:
+                pass
+        await super().close()
 
 
 def main():

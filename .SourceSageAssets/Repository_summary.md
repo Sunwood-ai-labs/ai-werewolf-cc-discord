@@ -63,6 +63,9 @@ Directory: /ai-werewolf/ai-werewolf-cc-discord
 │   ├── setup/
 │   │   ├── __init__.py
 │   │   └── create_server.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── discord_utils.py
 │   └── __init__.py
 ├── .env.example
 ├── .gitignore
@@ -78,56 +81,56 @@ Directory: /ai-werewolf/ai-werewolf-cc-discord
 
 - 🔗 リモートURL: https://github.com/Sunwood-ai-labs/ai-werewolf-cc-discord.git
 - 🌿 デフォルトブランチ: main
-- 🎯 現在のブランチ: main
-- 📅 作成日時: 2026-01-16 22:38:22
-- 📈 総コミット数: 1
+- 🎯 現在のブランチ: develop
+- 📅 作成日時: 2026-01-17 00:31:34
+- 📈 総コミット数: 16
 
 ### 🔄 最新のコミット
 
-- 📝 メッセージ: feat: Implement AI Werewolf Discord agents with Python
-- 🔍 ハッシュ: bfa6c4e6
+- 📝 メッセージ: Merge branch 'fix/code-review-feedback' into develop
+- 🔍 ハッシュ: 230f1e67
 - 👤 作者: Sunwood-ai-labs (sunwood.ai.labs@gmail.com)
-- ⏰ 日時: 2026-01-16 22:38:31
+- ⏰ 日時: 2026-01-17 00:31:34
 
 ### 👥 主要コントリビューター
 
 | 👤 名前 | 📊 コミット数 |
 |---------|-------------|
-| Sunwood-ai-labs | 1 |
+| Sunwood-ai-labs | 16 |
 
 ## 📊 プロジェクト統計
 
-- 📅 作成日時: 2026-01-16 23:43:11
-- 📁 総ディレクトリ数: 20
-- 📄 総ファイル数: 46
+- 📅 作成日時: 2026-01-17 01:50:08
+- 📁 総ディレクトリ数: 21
+- 📄 総ファイル数: 48
 - 📏 最大深度: 3
-- 📦 最大ディレクトリ:  (66 エントリ)
+- 📦 最大ディレクトリ:  (69 エントリ)
 
 ### 📊 ファイルサイズと行数
 
 | ファイル | サイズ | 行数 | 言語 |
 |----------|--------|------|------|
-| src/setup/create_server.py | 18.2 KB | 451 | python |
+| src/gm/main.py | 22.6 KB | 543 | python |
+| src/setup/create_server.py | 19.9 KB | 493 | python |
 | src/cli/main.py | 12.1 KB | 362 | python |
-| src/gm/main.py | 9.2 KB | 240 | python |
 | docs/AGENT_ICONS.md | 9.2 KB | 215 | markdown |
+| src/gm/game_state.py | 7.1 KB | 208 | python |
 | docs/BOT_SETUP.md | 7.0 KB | 199 | markdown |
 | docs/GAME_FLOW.md | 7.9 KB | 185 | markdown |
 | README.md | 6.2 KB | 163 | markdown |
 | src/gm/channel_manager.py | 4.1 KB | 127 | python |
 | src/gm/role_manager.py | 3.8 KB | 119 | python |
-| src/gm/game_state.py | 3.2 KB | 104 | python |
-| .gitignore | 661.0 B | 71 | plaintext |
+| agents/CLAUDE.md | 2.8 KB | 77 | markdown |
+| .gitignore | 732.0 B | 75 | plaintext |
+| agents/agent_6/CLAUDE.md | 2.7 KB | 75 | markdown |
+| agents/agent_3/CLAUDE.md | 2.7 KB | 75 | markdown |
+| agents/agent_2/CLAUDE.md | 2.7 KB | 75 | markdown |
+| agents/agent_1/CLAUDE.md | 2.7 KB | 75 | markdown |
+| agents/agent_4/CLAUDE.md | 2.7 KB | 75 | markdown |
+| agents/agent_5/CLAUDE.md | 2.7 KB | 75 | markdown |
 | hooks/keep_going.py | 1.9 KB | 71 | python |
-| agents/CLAUDE.md | 2.0 KB | 64 | markdown |
-| agents/agent_6/CLAUDE.md | 2.0 KB | 64 | markdown |
-| agents/agent_3/CLAUDE.md | 2.0 KB | 64 | markdown |
-| agents/agent_2/CLAUDE.md | 2.0 KB | 64 | markdown |
-| agents/agent_1/CLAUDE.md | 2.0 KB | 64 | markdown |
-| agents/agent_4/CLAUDE.md | 2.0 KB | 64 | markdown |
-| agents/agent_5/CLAUDE.md | 2.0 KB | 64 | markdown |
+| .env.example | 1.7 KB | 53 | plaintext |
 | assets/header.svg | 2.6 KB | 51 | plaintext |
-| .env.example | 1.3 KB | 44 | plaintext |
 | agents/agent_6/.claude/CLAUDE.md | 1.4 KB | 38 | markdown |
 | agents/agent_5/.claude/CLAUDE.md | 1.2 KB | 37 | markdown |
 | package.json | 728.0 B | 36 | json |
@@ -135,7 +138,8 @@ Directory: /ai-werewolf/ai-werewolf-cc-discord
 | agents/agent_4/.claude/CLAUDE.md | 1.3 KB | 36 | markdown |
 | agents/agent_2/.claude/CLAUDE.md | 1.0 KB | 34 | markdown |
 | agents/agent_1/.claude/CLAUDE.md | 1.1 KB | 34 | markdown |
-| pyproject.toml | 541.0 B | 28 | toml |
+| src/utils/discord_utils.py | 961.0 B | 31 | python |
+| pyproject.toml | 553.0 B | 29 | toml |
 | LICENSE | 1.0 KB | 21 | plaintext |
 | agents/agent_6/.env.example | 385.0 B | 13 | plaintext |
 | agents/agent_3/.env.example | 385.0 B | 13 | plaintext |
@@ -143,57 +147,67 @@ Directory: /ai-werewolf/ai-werewolf-cc-discord
 | agents/agent_1/.env.example | 385.0 B | 13 | plaintext |
 | agents/agent_4/.env.example | 385.0 B | 13 | plaintext |
 | agents/agent_5/.env.example | 385.0 B | 13 | plaintext |
-| agents/agent_6/.claude/settings.json | 156.0 B | 10 | json |
-| agents/agent_3/.claude/settings.json | 156.0 B | 10 | json |
-| agents/agent_2/.claude/settings.json | 156.0 B | 10 | json |
-| agents/agent_1/.claude/settings.json | 183.0 B | 10 | json |
-| agents/agent_4/.claude/settings.json | 156.0 B | 10 | json |
-| agents/agent_5/.claude/settings.json | 156.0 B | 10 | json |
+| agents/agent_6/.claude/settings.json | 182.0 B | 10 | json |
+| agents/agent_3/.claude/settings.json | 182.0 B | 10 | json |
+| agents/agent_2/.claude/settings.json | 182.0 B | 10 | json |
+| agents/agent_1/.claude/settings.json | 182.0 B | 10 | json |
+| agents/agent_4/.claude/settings.json | 182.0 B | 10 | json |
+| agents/agent_5/.claude/settings.json | 182.0 B | 10 | json |
 | src/__init__.py | 0.0 B | 0 | python |
 | src/gm/__init__.py | 0.0 B | 0 | python |
 | src/cli/__init__.py | 0.0 B | 0 | python |
 | src/setup/__init__.py | 0.0 B | 0 | python |
-| **合計** |  | **3288** |  |
+| src/utils/__init__.py | 0.0 B | 0 | python |
+| **合計** |  | **3861** |  |
 
 ### 📈 言語別統計
 
 | 言語 | ファイル数 | 総行数 | 合計サイズ |
 |------|------------|--------|------------|
-| python | 11 | 1474 | 52.5 KB |
-| markdown | 17 | 1425 | 51.4 KB |
-| plaintext | 10 | 265 | 7.8 KB |
-| json | 7 | 96 | 1.7 KB |
-| toml | 1 | 28 | 541.0 B |
+| python | 13 | 1954 | 72.5 KB |
+| markdown | 17 | 1504 | 56.2 KB |
+| plaintext | 10 | 278 | 8.3 KB |
+| json | 7 | 96 | 1.8 KB |
+| toml | 1 | 29 | 553.0 B |
 
 `.env.example`
 
-**サイズ**: 1.3 KB | **行数**: 44 行
+**サイズ**: 1.7 KB | **行数**: 53 行
 ```plaintext
 # ========================================
 # Game Master Bot
 # ========================================
 GAME_MASTER_TOKEN=your_gm_bot_token_here
 
+# ゲーム回数（履歴管理用、ゲーム開始時に自動でインクリメント）
+GAME_COUNT=1
+
 # ========================================
 # Agent Bots (6つ)
 # ========================================
 # Agent-1: Kenji (健二) - 人間
 AGENT_1_TOKEN=your_agent1_bot_token_here
+AGENT_1_DISCORD_ID=your_agent1_discord_user_id_here
 
 # Agent-2: Yuki (雪) - 人間
 AGENT_2_TOKEN=your_agent2_bot_token_here
+AGENT_2_DISCORD_ID=your_agent2_discord_user_id_here
 
 # Agent-3: Raphael - 天使
 AGENT_3_TOKEN=your_agent3_bot_token_here
+AGENT_3_DISCORD_ID=your_agent3_discord_user_id_here
 
 # Agent-4: Luna - 猫耳獣人
 AGENT_4_TOKEN=your_agent4_bot_token_here
+AGENT_4_DISCORD_ID=your_agent4_discord_user_id_here
 
 # Agent-5: Sylvan - エルフ
 AGENT_5_TOKEN=your_agent5_bot_token_here
+AGENT_5_DISCORD_ID=your_agent5_discord_user_id_here
 
 # Agent-6: Lilith - 吸血鬼
 AGENT_6_TOKEN=your_agent6_bot_token_here
+AGENT_6_DISCORD_ID=your_agent6_discord_user_id_here
 
 # ========================================
 # Discord Server Settings
@@ -217,7 +231,7 @@ AGENT_COUNT=6
 
 `.gitignore`
 
-**サイズ**: 661.0 B | **行数**: 71 行
+**サイズ**: 732.0 B | **行数**: 75 行
 ```plaintext
 # Environment variables
 .env
@@ -284,12 +298,16 @@ agents/*/.env
 agents/*/.env.*
 !agents/*/.env.example
 
+# Game state
+.game_state.json
+
 # Node.js (if any)
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 package-lock.json
+.SourceSageAssets/Repository_summary.md
 ```
 
 `LICENSE`
@@ -532,7 +550,7 @@ Made with ❤️ by the Sunwood AI Labs team
 
 `pyproject.toml`
 
-**サイズ**: 541.0 B | **行数**: 28 行
+**サイズ**: 553.0 B | **行数**: 29 行
 ```toml
 [project]
 name = "werewolf-discord-agents"
@@ -545,15 +563,16 @@ dependencies = [
     "click>=8.1.0",
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
+    "aiohttp>=3.9.0",
 ]
 
 [project.scripts]
-werewolf = "src.cli.main:cli"
-werewolf-gm = "src.gm.main:main"
-werewolf-setup = "src.setup.create_server:main"
+werewolf = "cli.main:cli"
+werewolf-gm = "gm.main:main"
+werewolf-setup = "setup.create_server:main"
 
 [tool.setuptools]
-package-dir = {"" = "."}
+package-dir = {"" = "src"}
 
 [dependency-groups]
 dev = [
@@ -566,13 +585,26 @@ package = true
 
 `agents/CLAUDE.md`
 
-**サイズ**: 2.0 KB | **行数**: 64 行
+**サイズ**: 2.8 KB | **行数**: 77 行
 ```markdown
 # 🐺 人狼ゲーム エージェント
 
 あなたは Discord 人狼ゲームのプレイヤー「${AGENT_ID}」です。
 
+## ⚠️ 重要なセキュリティルール
+
+**あなたは自分のエージェントフォルダ（`agents/agent_X/`）以外のファイルには絶対にアクセスしないでください。**
+
+- ✅ アクセスして良い: `agents/agent_1/` （agent-1の場合）
+- ❌ アクセス禁止: 他のエージェントフォルダ（`agents/agent_2/`、`agents/agent_3/`、...）
+- ❌ アクセス禁止: 他の設定ファイル、ソースコード、環境変数など
+
+**他のエージェントの設定や、GMの設定を覗き見ることは厳禁です。**
+ゲームの公平性を保つため、自分の情報だけを使ってプレイしてください。
+
 ## 🎮 基本コマンド
+
+**⚠️ 重要: すべてのコマンドは必ず自分のエージェントディレクトリ（`agents/agent_X/`）で実行してください。**
 
 ```bash
 # 全体状況を確認（まずこれを実行！）
@@ -655,11 +687,22 @@ AGENT_ID=agent-6
 
 `agents/agent_6/CLAUDE.md`
 
-**サイズ**: 2.0 KB | **行数**: 64 行
+**サイズ**: 2.7 KB | **行数**: 75 行
 ```markdown
 # 🐺 人狼ゲーム エージェント
 
 あなたは Discord 人狼ゲームのプレイヤー「agent-6」です。
+
+## ⚠️ 重要なセキュリティルール
+
+**あなたは自分のエージェントフォルダ（`agents/agent_X/`）以外のファイルには絶対にアクセスしないでください。**
+
+- ✅ アクセスして良い: `agents/agent_1/` （agent-1の場合）
+- ❌ アクセス禁止: 他のエージェントフォルダ（`agents/agent_2/`、`agents/agent_3/`、...）
+- ❌ アクセス禁止: 他の設定ファイル、ソースコード、環境変数など
+
+**他のエージェントの設定や、GMの設定を覗き見ることは厳禁です。**
+ゲームの公平性を保つため、自分の情報だけを使ってプレイしてください。
 
 ## 🎮 基本コマンド
 
@@ -769,7 +812,7 @@ uv run werewolf updates --hours 1
 
 `agents/agent_6/.claude/settings.json`
 
-**サイズ**: 156.0 B | **行数**: 10 行
+**サイズ**: 182.0 B | **行数**: 10 行
 ```json
 {
   "hooks": {
@@ -804,11 +847,22 @@ AGENT_ID=agent-3
 
 `agents/agent_3/CLAUDE.md`
 
-**サイズ**: 2.0 KB | **行数**: 64 行
+**サイズ**: 2.7 KB | **行数**: 75 行
 ```markdown
 # 🐺 人狼ゲーム エージェント
 
 あなたは Discord 人狼ゲームのプレイヤー「agent-3」です。
+
+## ⚠️ 重要なセキュリティルール
+
+**あなたは自分のエージェントフォルダ（`agents/agent_X/`）以外のファイルには絶対にアクセスしないでください。**
+
+- ✅ アクセスして良い: `agents/agent_1/` （agent-1の場合）
+- ❌ アクセス禁止: 他のエージェントフォルダ（`agents/agent_2/`、`agents/agent_3/`、...）
+- ❌ アクセス禁止: 他の設定ファイル、ソースコード、環境変数など
+
+**他のエージェントの設定や、GMの設定を覗き見ることは厳禁です。**
+ゲームの公平性を保つため、自分の情報だけを使ってプレイしてください。
 
 ## 🎮 基本コマンド
 
@@ -916,7 +970,7 @@ uv run werewolf updates --hours 1
 
 `agents/agent_3/.claude/settings.json`
 
-**サイズ**: 156.0 B | **行数**: 10 行
+**サイズ**: 182.0 B | **行数**: 10 行
 ```json
 {
   "hooks": {
@@ -951,11 +1005,22 @@ AGENT_ID=agent-2
 
 `agents/agent_2/CLAUDE.md`
 
-**サイズ**: 2.0 KB | **行数**: 64 行
+**サイズ**: 2.7 KB | **行数**: 75 行
 ```markdown
 # 🐺 人狼ゲーム エージェント
 
 あなたは Discord 人狼ゲームのプレイヤー「agent-2」です。
+
+## ⚠️ 重要なセキュリティルール
+
+**あなたは自分のエージェントフォルダ（`agents/agent_X/`）以外のファイルには絶対にアクセスしないでください。**
+
+- ✅ アクセスして良い: `agents/agent_1/` （agent-1の場合）
+- ❌ アクセス禁止: 他のエージェントフォルダ（`agents/agent_2/`、`agents/agent_3/`、...）
+- ❌ アクセス禁止: 他の設定ファイル、ソースコード、環境変数など
+
+**他のエージェントの設定や、GMの設定を覗き見ることは厳禁です。**
+ゲームの公平性を保つため、自分の情報だけを使ってプレイしてください。
 
 ## 🎮 基本コマンド
 
@@ -1061,7 +1126,7 @@ uv run werewolf updates --hours 1
 
 `agents/agent_2/.claude/settings.json`
 
-**サイズ**: 156.0 B | **行数**: 10 行
+**サイズ**: 182.0 B | **行数**: 10 行
 ```json
 {
   "hooks": {
@@ -1096,11 +1161,22 @@ AGENT_ID=agent-1
 
 `agents/agent_1/CLAUDE.md`
 
-**サイズ**: 2.0 KB | **行数**: 64 行
+**サイズ**: 2.7 KB | **行数**: 75 行
 ```markdown
 # 🐺 人狼ゲーム エージェント
 
 あなたは Discord 人狼ゲームのプレイヤー「agent-1」です。
+
+## ⚠️ 重要なセキュリティルール
+
+**あなたは自分のエージェントフォルダ（`agents/agent_X/`）以外のファイルには絶対にアクセスしないでください。**
+
+- ✅ アクセスして良い: `agents/agent_1/` （agent-1の場合）
+- ❌ アクセス禁止: 他のエージェントフォルダ（`agents/agent_2/`、`agents/agent_3/`、...）
+- ❌ アクセス禁止: 他の設定ファイル、ソースコード、環境変数など
+
+**他のエージェントの設定や、GMの設定を覗き見ることは厳禁です。**
+ゲームの公平性を保つため、自分の情報だけを使ってプレイしてください。
 
 ## 🎮 基本コマンド
 
@@ -1206,14 +1282,14 @@ uv run werewolf updates --hours 1
 
 `agents/agent_1/.claude/settings.json`
 
-**サイズ**: 183.0 B | **行数**: 10 行
+**サイズ**: 182.0 B | **行数**: 10 行
 ```json
 {
   "hooks": {
     "Stop": [{
       "hooks": [{
         "type": "command",
-        "command": "upython3 /ai-werewolf/ai-werewolf-cc-discord/hooks/keep_going.py"
+        "command": "python3 /ai-werewolf/ai-werewolf-cc-discord/hooks/keep_going.py"
       }]
     }]
   }
@@ -1241,11 +1317,22 @@ AGENT_ID=agent-4
 
 `agents/agent_4/CLAUDE.md`
 
-**サイズ**: 2.0 KB | **行数**: 64 行
+**サイズ**: 2.7 KB | **行数**: 75 行
 ```markdown
 # 🐺 人狼ゲーム エージェント
 
 あなたは Discord 人狼ゲームのプレイヤー「agent-4」です。
+
+## ⚠️ 重要なセキュリティルール
+
+**あなたは自分のエージェントフォルダ（`agents/agent_X/`）以外のファイルには絶対にアクセスしないでください。**
+
+- ✅ アクセスして良い: `agents/agent_1/` （agent-1の場合）
+- ❌ アクセス禁止: 他のエージェントフォルダ（`agents/agent_2/`、`agents/agent_3/`、...）
+- ❌ アクセス禁止: 他の設定ファイル、ソースコード、環境変数など
+
+**他のエージェントの設定や、GMの設定を覗き見ることは厳禁です。**
+ゲームの公平性を保つため、自分の情報だけを使ってプレイしてください。
 
 ## 🎮 基本コマンド
 
@@ -1353,7 +1440,7 @@ uv run werewolf updates --hours 1
 
 `agents/agent_4/.claude/settings.json`
 
-**サイズ**: 156.0 B | **行数**: 10 行
+**サイズ**: 182.0 B | **行数**: 10 行
 ```json
 {
   "hooks": {
@@ -1388,11 +1475,22 @@ AGENT_ID=agent-5
 
 `agents/agent_5/CLAUDE.md`
 
-**サイズ**: 2.0 KB | **行数**: 64 行
+**サイズ**: 2.7 KB | **行数**: 75 行
 ```markdown
 # 🐺 人狼ゲーム エージェント
 
 あなたは Discord 人狼ゲームのプレイヤー「agent-5」です。
+
+## ⚠️ 重要なセキュリティルール
+
+**あなたは自分のエージェントフォルダ（`agents/agent_X/`）以外のファイルには絶対にアクセスしないでください。**
+
+- ✅ アクセスして良い: `agents/agent_1/` （agent-1の場合）
+- ❌ アクセス禁止: 他のエージェントフォルダ（`agents/agent_2/`、`agents/agent_3/`、...）
+- ❌ アクセス禁止: 他の設定ファイル、ソースコード、環境変数など
+
+**他のエージェントの設定や、GMの設定を覗き見ることは厳禁です。**
+ゲームの公平性を保つため、自分の情報だけを使ってプレイしてください。
 
 ## 🎮 基本コマンド
 
@@ -1501,7 +1599,7 @@ uv run werewolf updates --hours 1
 
 `agents/agent_5/.claude/settings.json`
 
-**サイズ**: 156.0 B | **行数**: 10 行
+**サイズ**: 182.0 B | **行数**: 10 行
 ```json
 {
   "hooks": {
@@ -2338,7 +2436,7 @@ class ChannelManager:
 
 `src/gm/game_state.py`
 
-**サイズ**: 3.2 KB | **行数**: 104 行
+**サイズ**: 7.1 KB | **行数**: 208 行
 ```python
 """
 ゲーム状態の管理
@@ -2347,7 +2445,7 @@ class ChannelManager:
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Phase(Enum):
@@ -2367,13 +2465,22 @@ class Role(Enum):
 
 
 @dataclass
+class PhaseTimeLimit:
+    """フェーズの時間制限"""
+    day_discussion: int = 60     # 昼の議論時間（秒）
+    day_voting: int = 30         # 投票時間（秒）
+    night: int = 30              # 夜の時間（秒）
+
+
+@dataclass
 class Player:
     """プレイヤー情報"""
     agent_id: str                # エージェントID (agent-1, agent-2, ...)
     discord_id: int              # Discord User ID
     role: Optional[Role] = None  # 役職
     is_alive: bool = True        # 生存フラグ
-    votes: Dict[str, int] = field(default_factory=dict)  # 投票記録
+    has_voted: bool = False      # 投票済みフラグ
+    vote_target: Optional[str] = None  # 投票先
 
 
 @dataclass
@@ -2394,6 +2501,48 @@ class GameState:
     game_started_at: Optional[datetime] = None
     winner: Optional[str] = None  # "villagers" or "werewolves"
 
+    # 時間管理
+    phase_started_at: Optional[datetime] = None  # 現在のフェーズ開始時刻
+    phase_time_limit: PhaseTimeLimit = field(default_factory=PhaseTimeLimit)
+    current_sub_phase: str = "discussion"  # "discussion" or "voting" for day phase
+
+    def get_phase_time_limit_seconds(self) -> int:
+        """現在のフェーズの時間制限（秒）を取得"""
+        if self.phase == Phase.DAY:
+            if self.current_sub_phase == "discussion":
+                return self.phase_time_limit.day_discussion
+            elif self.current_sub_phase == "voting":
+                return self.phase_time_limit.day_voting
+        elif self.phase == Phase.NIGHT:
+            return self.phase_time_limit.night
+        return 0
+
+    def get_remaining_seconds(self) -> int:
+        """残り時間（秒）を取得"""
+        if not self.phase_started_at:
+            return 0
+
+        limit = self.get_phase_time_limit_seconds()
+        if limit == 0:
+            return 0
+
+        elapsed = (datetime.now() - self.phase_started_at).total_seconds()
+        remaining = max(0, limit - elapsed)
+        return int(remaining)
+
+    def is_phase_timeout(self) -> bool:
+        """フェーズが時間切れかどうか"""
+        return self.get_remaining_seconds() <= 0
+
+    def get_phase_end_time(self) -> Optional[datetime]:
+        """フェーズ終了時刻を取得"""
+        if not self.phase_started_at:
+            return None
+        limit = self.get_phase_time_limit_seconds()
+        if limit == 0:
+            return None
+        return self.phase_started_at + timedelta(seconds=limit)
+
     def add_player(self, agent_id: str, discord_id: int):
         """プレイヤーを追加"""
         self.players[agent_id] = Player(agent_id=agent_id, discord_id=discord_id)
@@ -2407,7 +2556,7 @@ class GameState:
         return [p for p in self.players.values() if p.is_alive]
 
     def get_players_by_role(self, role: Role) -> List[Player]:
-    """特定の役職のプレイヤーを取得"""
+        """特定の役職のプレイヤーを取得"""
         return [p for p in self.players.values() if p.role == role]
 
     def count_werewolves(self) -> int:
@@ -2435,20 +2584,73 @@ class GameState:
         self.phase = Phase.DAY
         self.day_count += 1
         self.night_actions.clear()
+        self.current_sub_phase = "discussion"  # 議論フェーズから開始
+        self.phase_started_at = datetime.now()  # フェーズ開始時刻を記録
 
     def transition_to_night(self):
         """夜フェーズに移行"""
         self.phase = Phase.NIGHT
+        self.phase_started_at = datetime.now()  # フェーズ開始時刻を記録
+
+    def start_voting_phase(self):
+        """投票フェーズを開始"""
+        self.current_sub_phase = "voting"
+        self.phase_started_at = datetime.now()  # 投票開始時刻を記録
+        # 全プレイヤーの投票をリセット
+        for player in self.players.values():
+            player.has_voted = False
+            player.vote_target = None
 
     def end_game(self, winner: str):
         """ゲームを終了"""
         self.phase = Phase.GAME_OVER
         self.winner = winner
+        self.phase_started_at = None
+
+    def cast_vote(self, voter_id: str, target_id: str) -> bool:
+        """投票を処理"""
+        voter = self.get_player(voter_id)
+        target = self.get_player(target_id)
+
+        if not voter or not target:
+            return False
+        if not voter.is_alive or not target.is_alive:
+            return False
+
+        voter.has_voted = True
+        voter.vote_target = target_id
+        return True
+
+    def get_vote_results(self) -> Dict[str, int]:
+        """投票結果を集計（対象 -> 票数）"""
+        results: Dict[str, int] = {}
+        for player in self.players.values():
+            if player.is_alive and player.vote_target:
+                results[player.vote_target] = results.get(player.vote_target, 0) + 1
+        return results
+
+    def get_most_voted_player(self) -> Optional[str]:
+        """最多投票者を取得（同数の場合は None）"""
+        results = self.get_vote_results()
+        if not results:
+            return None
+
+        max_votes = max(results.values())
+        most_voted = [pid for pid, count in results.items() if count == max_votes]
+
+        # 同数の場合は None
+        if len(most_voted) > 1:
+            return None
+        return most_voted[0]
+
+    def count_voters(self) -> int:
+        """投票した生存プレイヤー数を取得"""
+        return len([p for p in self.players.values() if p.is_alive and p.has_voted])
 ```
 
 `src/gm/main.py`
 
-**サイズ**: 9.2 KB | **行数**: 240 行
+**サイズ**: 22.6 KB | **行数**: 543 行
 ```python
 """
 Game Master Bot - 人狼ゲームの進行を管理
@@ -2458,18 +2660,83 @@ import discord
 import asyncio
 import os
 import re
+import json
+from pathlib import Path
 from typing import Dict, Optional
+from datetime import datetime
 from dotenv import load_dotenv
 
 from .game_state import GameState, Phase, Player, Role, NightAction
 from .role_manager import RoleManager
 from .channel_manager import ChannelManager
 
+
+# ゲーム回数管理用ファイル
+GAME_STATE_FILE = Path(__file__).parent.parent.parent / ".game_state.json"
+
+
+def log_with_timestamp(message: str):
+    """タイムスタンプ付きでログを出力"""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}")
+
+
+def load_game_count() -> int:
+    """ゲーム回数をファイルから読み込む"""
+    if GAME_STATE_FILE.exists():
+        try:
+            with open(GAME_STATE_FILE, 'r') as f:
+                data = json.load(f)
+                count = data.get('game_count', 1)
+                log_with_timestamp(f"✓ ゲーム回数を読み込みました: {count}")
+                return count
+        except Exception as e:
+            log_with_timestamp(f"⚠️ ゲーム回数の読み込みに失敗: {e}")
+    else:
+        # ファイルがなければ初期値で作成
+        log_with_timestamp("📝 ゲーム回数ファイルを初期化します")
+        save_game_count(1)
+    return 1
+
+
+def save_game_count(count: int):
+    """ゲーム回数をファイルに保存"""
+    try:
+        GAME_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(GAME_STATE_FILE, 'w') as f:
+            json.dump({'game_count': count}, f, indent=2)
+    except Exception as e:
+        log_with_timestamp(f"⚠️ ゲーム回数の保存に失敗: {e}")
+
+
+async def get_bot_user_id(token: str):
+    """BotトークンからユーザーIDを取得 (HTTP API経由)"""
+    import aiohttp
+    url = "https://discord.com/api/v10/users/@me"
+    headers = {"Authorization": f"Bot {token}"}
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return int(data['id'])
+                else:
+                    print(f"  ⚠️ Bot ID の取得に失敗: Status {response.status}")
+                    return None
+    except Exception as e:
+        print(f"  ⚠️ Bot ID の取得中にHTTPエラーが発生: {e}")
+        return None
+
 load_dotenv()
 
 TOKEN = os.environ.get('GAME_MASTER_TOKEN', os.environ.get('DISCORD_TOKEN'))
 GUILD_ID = int(os.environ['GUILD_ID'])
 AGENT_COUNT = int(os.environ.get('AGENT_COUNT', 6))
+# ゲーム回数は前回の回数を読み込んで+1して今回の回数にする
+GAME_COUNT = load_game_count() + 1
+# 保存して、次回起動時もこの回数をベースに+1されるようにする
+save_game_count(GAME_COUNT)
 
 
 class GameMasterBot(discord.Client):
@@ -2485,24 +2752,103 @@ class GameMasterBot(discord.Client):
         self.role_manager: Optional[RoleManager] = None
         self.channel_manager: Optional[ChannelManager] = None
         self.agent_discord_ids: Dict[str, int] = {}  # agent_id -> discord_id
-
-    async def setup_hook(self):
-        """Bot 起動時のセットアップ"""
-        # 起動待機
-        await self.wait_until_ready()
-        print(f"✓ Game Master Bot が起動しました: {self.user}")
+        self.timer_task: Optional[asyncio.Task] = None  # バックグラウンドタイマータスク
+        self.timer_stopped = False  # タイマー停止フラグ
+        self.last_announced_time: Optional[int] = None  # 最後にアナウンスした残り時間
 
     async def on_ready(self):
         """Bot 準備完了"""
+        log_with_timestamp(f"✓ Game Master Bot が起動しました: {self.user}")
+
         guild = self.get_guild(GUILD_ID)
         if not guild:
-            print(f"✗ Guild {GUILD_ID} が見つかりません")
+            log_with_timestamp(f"✗ Guild {GUILD_ID} が見つかりません")
             return
 
-        print(f"✓ サーバーに接続: {guild.name}")
+        log_with_timestamp(f"✓ サーバーに接続: {guild.name}")
 
         self.channel_manager = ChannelManager(guild)
         self.role_manager = RoleManager(self.game_state)
+
+        # ゲームを自動開始
+        agent_ids = [f"agent-{i}" for i in range(1, AGENT_COUNT + 1)]
+        log_with_timestamp(f"✓ ゲームを開始します: {', '.join(agent_ids)}")
+        success = await self.start_game(agent_ids)
+
+        if success:
+            log_with_timestamp("✓ ゲームが正常に開始されました")
+        else:
+            log_with_timestamp("✗ ゲームの開始に失敗しました")
+
+        # バックグラウンドタイマーを開始
+        self.timer_stopped = False
+        self.timer_task = self.loop.create_task(self._background_timer())
+
+    async def _background_timer(self):
+        """バックグラウンドで動作するタイマータスク"""
+        log_with_timestamp("⏱️ タイマーを開始しました")
+
+        # アナウンスする残り時間（秒）
+        announcement_times = [60, 30, 15, 10, 5, 3, 2, 1]
+
+        while not self.timer_stopped:
+            try:
+                # ゲーム中でなければスキップ
+                if self.game_state.phase == Phase.SETUP or self.game_state.phase == Phase.GAME_OVER:
+                    await asyncio.sleep(1)
+                    continue
+
+                # 残り時間を取得
+                remaining = self.game_state.get_remaining_seconds()
+
+                # 残り時間アナウンス
+                if remaining != self.last_announced_time and remaining in announcement_times:
+                    phase_name = ""
+                    if self.game_state.phase == Phase.DAY:
+                        if self.game_state.current_sub_phase == "discussion":
+                            phase_name = "議論"
+                        elif self.game_state.current_sub_phase == "voting":
+                            phase_name = "投票"
+                    elif self.game_state.phase == Phase.NIGHT:
+                        phase_name = "夜"
+
+                    if phase_name:
+                        await self.channel_manager.send_to_village(f"⏰ {phase_name}残り{remaining}秒！")
+                        await self.channel_manager.send_to_game_log(f"⏰ {phase_name}残り{remaining}秒をアナウンス")
+                    self.last_announced_time = remaining
+
+                # 時間切れチェック
+                if self.game_state.is_phase_timeout():
+                    self.last_announced_time = None  # フェーズ変更時にリセット
+
+                    phase = self.game_state.phase
+                    sub_phase = self.game_state.current_sub_phase
+
+                    if phase == Phase.DAY:
+                        if sub_phase == "discussion":
+                            log_with_timestamp("⏰ 議論時間終了 - 投票フェーズへ移行")
+                            await self.start_voting_phase()
+                        elif sub_phase == "voting":
+                            log_with_timestamp("⏰ 投票時間終了 - 投票結果を集計")
+                            await self.process_voting_results()
+
+                            # 投票結果処理後、まだ昼なら夜へ移行
+                            if self.game_state.phase == Phase.DAY:
+                                log_with_timestamp("🌙 夜フェーズへ移行")
+                                await self.transition_to_night()
+
+                    elif phase == Phase.NIGHT:
+                        log_with_timestamp("⏰ 夜時間終了 - 昼フェーズへ移行")
+                        await self.transition_to_day()
+
+                await asyncio.sleep(1)  # 1秒ごとにチェック
+
+            except asyncio.CancelledError:
+                log_with_timestamp("⏱️ タイマーが停止しました")
+                break
+            except Exception as e:
+                log_with_timestamp(f"⚠️ タイマーでエラーが発生: {e}")
+                await asyncio.sleep(1)
 
     async def on_message(self, message: discord.Message):
         """メッセージ受信"""
@@ -2562,9 +2908,24 @@ class GameMasterBot(discord.Client):
                 await message.channel.send("⚠️ 投票は昼フェーズのみ使用できます")
                 return
 
+            if self.game_state.current_sub_phase != "voting":
+                await message.channel.send("⚠️ 投票フェーズではありません")
+                return
+
             target_id = content.split(":", 1)[1].strip()
-            # 投票処理（仮実装）
-            await message.channel.send(f"✅ {target_id} に投票しました")
+
+            # 投票処理
+            if self.game_state.cast_vote(agent_id, target_id):
+                await message.channel.send(f"✅ {target_id} に投票しました")
+
+                # 全員投票したかチェック
+                alive_count = len(self.game_state.get_alive_players())
+                voter_count = self.game_state.count_voters()
+
+                if voter_count >= alive_count:
+                    await message.channel.send(f"📊 全員の投票が揃いました（{voter_count}/{alive_count}）")
+            else:
+                await message.channel.send("⚠️ 投票に失敗しました")
 
         elif content.startswith("襲撃:"):
             if self.game_state.phase != Phase.NIGHT:
@@ -2586,16 +2947,56 @@ class GameMasterBot(discord.Client):
         if self.game_state.phase != Phase.SETUP:
             return False
 
-        # プレイヤーを登録
+        # プレイヤーを登録（並列で Discord ID を取得）
+        tasks = []
         for agent_id in agent_ids:
-            # Discord ID を取得（ここでは仮実装）
-            discord_id = int(hash(agent_id)) % 1000000000  # 仮の ID
-            self.game_state.add_player(agent_id, discord_id)
-            self.agent_discord_ids[agent_id] = discord_id
+            # Discord ID を環境変数から取得（なければトークンから取得）
+            env_key = f"AGENT_{agent_id.split('-')[1].upper()}_DISCORD_ID"
+            discord_id_str = os.environ.get(env_key)
+
+            if discord_id_str:
+                discord_id = int(discord_id_str)
+                print(f"✓ {agent_id}: Discord ID を環境変数から取得: {discord_id}")
+                self.game_state.add_player(agent_id, discord_id)
+                self.agent_discord_ids[agent_id] = discord_id
+            else:
+                # トークンから Bot のユーザー ID を取得
+                token_key = f"AGENT_{agent_id.split('-')[1].upper()}_TOKEN"
+                token = os.environ.get(token_key)
+
+                if not token:
+                    print(f"⚠️ {token_key} が設定されていません")
+                    return False
+
+                # 非同期タスクとして実行
+                async def get_and_add(agent_id, token):
+                    discord_id = await get_bot_user_id(token)
+                    if not discord_id:
+                        print(f"⚠️ {agent_id} の Discord ID が取得できません")
+                        return None, None
+                    print(f"✓ {agent_id}: Discord ID をトークンから取得: {discord_id}")
+                    self.game_state.add_player(agent_id, discord_id)
+                    self.agent_discord_ids[agent_id] = discord_id
+                    return agent_id, discord_id
+
+                tasks.append(get_and_add(agent_id, token))
+
+        # 並列実行
+        if tasks:
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for result in results:
+                if isinstance(result, Exception):
+                    print(f"⚠️ Discord ID 取得中にエラーが発生: {result}")
+                    return False
+                elif result and result[0] is None:
+                    return False
 
         # 役職を割り当て
         if not self.role_manager.assign_roles(len(agent_ids)):
             return False
+
+        # ゲーム回数プレフィックス
+        game_count_prefix = f"【第{GAME_COUNT}回】"
 
         # 各プレイヤーに役職を通知
         for agent_id in agent_ids:
@@ -2603,22 +3004,41 @@ class GameMasterBot(discord.Client):
             if player and player.role:
                 role_desc = self.role_manager.get_role_description(player.role)
 
-                # 人狼の場合は仲間も通知
+                # 人狼の場合は仲間も通知（Discord Mention で表示）
                 if player.role == Role.WEREWOLF:
                     partners = self.role_manager.get_werewolf_partners(agent_id)
                     if partners:
-                        role_desc += f"\n\n仲間の人狼: {', '.join(partners)}"
+                        # Discord Mention に変換
+                        partner_mentions = []
+                        for partner_id in partners:
+                            partner_player = self.game_state.get_player(partner_id)
+                            if partner_player:
+                                partner_mentions.append(f"<@{partner_player.discord_id}>")
+                        role_desc += f"\n\n仲間の人狼: {', '.join(partner_mentions)}"
 
-                await self.channel_manager.send_to_dm_channel(agent_id, f"🎭 **あなたの役職**: {role_desc}")
+                # 区切り線付きで送信
+                dm_message = f"{game_count_prefix} {'=' * 40}\n🎭 **あなたの役職**: {role_desc}\n{'=' * 40}"
+                await self.channel_manager.send_to_dm_channel(agent_id, dm_message)
 
         # 人狼に権限を付与
         werewolves = self.game_state.get_players_by_role(Role.WEREWOLF)
         await self.channel_manager.set_werewolf_role([p.agent_id for p in werewolves])
 
+        # 全プレイヤーに alive ロールを付与（villageチャンネルの書き込み権限のため）
+        await self.channel_manager.start_game(list(self.agent_discord_ids.values()))
+
+        # ゲーム回数を表示（履歴管理）
+        game_count_prefix = f"【第{GAME_COUNT}回】"
+
         # ゲームを昼フェーズへ
         self.game_state.transition_to_day()
-        await self.channel_manager.send_to_village("☀️ **ゲーム開始！** 昼フェーズです。議論を開始してください。")
-        await self.channel_manager.send_to_game_log("🎮 ゲームが開始されました")
+
+        # 残り時間を計算
+        remaining = self.game_state.get_remaining_seconds()
+        time_str = f"（残り{remaining}秒）"
+
+        await self.channel_manager.send_to_village(f"{game_count_prefix} ☀️ **ゲーム開始！** 昼フェーズです。議論を開始してください。{time_str}")
+        await self.channel_manager.send_to_game_log(f"{game_count_prefix} 🎮 ゲームが開始されました")
 
         return True
 
@@ -2629,20 +3049,24 @@ class GameMasterBot(discord.Client):
 
         self.game_state.transition_to_night()
 
+        # 残り時間を計算
+        remaining = self.game_state.get_remaining_seconds()
+        time_str = f"（残り{remaining}秒）"
+
         # 村をロック
         await self.channel_manager.lock_village()
-        await self.channel_manager.send_to_village("🌙 **夜になりました**")
+        await self.channel_manager.send_to_village(f"🌙 **夜になりました**{time_str}")
 
         # 各能力者に通知
         for player in self.game_state.get_alive_players():
             if player.role == Role.SEER:
-                await self.channel_manager.send_to_dm_channel(player.agent_id, "🌙 夜です。占いたい相手を `占い: agent-X` の形式で指定してください")
+                await self.channel_manager.send_to_dm_channel(player.agent_id, f"🌙 夜です（残り{remaining}秒）。占いたい相手を `占い: agent-X` の形式で指定してください")
             elif player.role == Role.KNIGHT:
-                await self.channel_manager.send_to_dm_channel(player.agent_id, "🌙 夜です。護衛したい相手を `護衛: agent-X` の形式で指定してください")
+                await self.channel_manager.send_to_dm_channel(player.agent_id, f"🌙 夜です（残り{remaining}秒）。護衛したい相手を `護衛: agent-X` の形式で指定してください")
             elif player.role == Role.WEREWOLF:
-                await self.channel_manager.send_to_werewolf_room("🌙 夜です。襲撃対象を決めて `襲撃: agent-X` の形式で GM に送ってください")
+                await self.channel_manager.send_to_werewolf_room(f"🌙 夜です（残り{remaining}秒）。襲撃対象を決めて `襲撃: agent-X` の形式で GM に送ってください")
 
-        await self.channel_manager.send_to_game_log("🌙 夜フェーズに移行しました")
+        await self.channel_manager.send_to_game_log(f"🌙 夜フェーズに移行しました（残り{remaining}秒）")
 
         return True
 
@@ -2653,19 +3077,88 @@ class GameMasterBot(discord.Client):
 
         self.game_state.transition_to_day()
 
+        # 夜の結果処理：誰が死んだか確認
+        dead_players = [p for p in self.game_state.players.values() if not p.is_alive]
+
         # 村をアンロック
         await self.channel_manager.unlock_village()
-        await self.channel_manager.send_to_village(f"☀️ **{self.game_state.day_count}日目** です")
 
-        # 被害者を通知（ここでは仮実装）
-        await self.channel_manager.send_to_village("昨夜は誰も死亡しませんでした")
+        # 残り時間を計算
+        remaining = self.game_state.get_remaining_seconds()
+        time_str = f"（残り{remaining}秒）"
+
+        await self.channel_manager.send_to_village(f"☀️ **{self.game_state.day_count}日目** です{time_str}")
+
+        # 被害者を通知
+        if dead_players:
+            dead_names = [p.agent_id for p in dead_players]
+            await self.channel_manager.send_to_village(f"昨夜の被害者: {', '.join(dead_names)}")
+
+            # 死亡したプレイヤーを処理
+            for player in dead_players:
+                await self.channel_manager.eliminate_player(player.discord_id)
+                await self.channel_manager.send_to_graveyard(f"👻 {player.agent_id} が霊界に来ました")
+        else:
+            await self.channel_manager.send_to_village("昨夜は誰も死亡しませんでした")
+
+        # 夜の行動をリセット
+        self.role_manager.reset_night_actions()
 
         # 勝利条件チェック
         winner = self.game_state.check_win_condition()
         if winner:
             await self.end_game(winner)
+            return True
 
         await self.channel_manager.send_to_game_log(f"☀️ {self.game_state.day_count}日目に移行しました")
+
+        return True
+
+    async def start_voting_phase(self):
+        """投票フェーズを開始"""
+        if self.game_state.phase != Phase.DAY or self.game_state.current_sub_phase != "discussion":
+            return False
+
+        self.game_state.start_voting_phase()
+
+        # 残り時間を計算
+        remaining = self.game_state.get_remaining_seconds()
+
+        await self.channel_manager.send_to_village(f"📊 **投票フェーズ開始**（残り{remaining}秒）\nDMで `投票: agent-X` の形式で投票してください")
+        await self.channel_manager.send_to_game_log(f"📊 投票フェーズを開始しました（残り{remaining}秒）")
+
+        return True
+
+    async def process_voting_results(self):
+        """投票結果を処理して処刑を実行"""
+        if self.game_state.current_sub_phase != "voting":
+            return False
+
+        results = self.game_state.get_vote_results()
+        most_voted = self.game_state.get_most_voted_player()
+
+        if not results:
+            await self.channel_manager.send_to_village("📊 投票結果: 誰も投票しませんでした")
+        elif most_voted is None:
+            # 同数の場合
+            await self.channel_manager.send_to_village(f"📊 投票結果: 同票で決着がつきませんでした\n{', '.join([f'{k}: {v}票' for k, v in results.items()])}")
+        else:
+            # 処刑実行
+            votes = results[most_voted]
+            await self.channel_manager.send_to_village(f"📊 投票結果: **{most_voted}** が処刑されました（{votes}票）")
+
+            # プレイヤーを死亡
+            player = self.game_state.get_player(most_voted)
+            if player:
+                player.is_alive = False
+                await self.channel_manager.eliminate_player(player.discord_id)
+                await self.channel_manager.send_to_graveyard(f"👻 {most_voted} が処刑され、霊界に来ました")
+
+        # 勝利条件チェック
+        winner = self.game_state.check_win_condition()
+        if winner:
+            await self.end_game(winner)
+            return True
 
         return True
 
@@ -2680,6 +3173,18 @@ class GameMasterBot(discord.Client):
 
         await self.channel_manager.send_to_village(message)
         await self.channel_manager.send_to_game_log(f"🏁 ゲーム終了: {winner} の勝利")
+        log_with_timestamp(f"✓ 第{GAME_COUNT}回ゲームが終了しました")
+
+    async def close(self):
+        """Bot を閉じる時の処理"""
+        self.timer_stopped = True
+        if self.timer_task and not self.timer_task.done():
+            self.timer_task.cancel()
+            try:
+                await self.timer_task
+            except asyncio.CancelledError:
+                pass
+        await super().close()
 
 
 def main():
@@ -3201,7 +3706,7 @@ if __name__ == '__main__':
 
 `src/setup/create_server.py`
 
-**サイズ**: 18.2 KB | **行数**: 451 行
+**サイズ**: 19.9 KB | **行数**: 493 行
 ```python
 #!/usr/bin/env python3
 """
@@ -3216,6 +3721,27 @@ import click
 import shutil
 from pathlib import Path
 from dotenv import load_dotenv
+
+
+async def get_bot_user_id(token: str):
+    """BotトークンからユーザーIDを取得 (HTTP API経由)"""
+    import aiohttp
+    url = "https://discord.com/api/v10/users/@me"
+    headers = {"Authorization": f"Bot {token}"}
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return int(data['id'])
+                else:
+                    print(f"  ⚠️ Bot ID の取得に失敗: Status {response.status}")
+                    return None
+    except Exception as e:
+        print(f"  ⚠️ Bot ID の取得中にHTTPエラーが発生: {e}")
+        return None
+
 
 load_dotenv()
 
@@ -3347,13 +3873,17 @@ AGENT_ID={agent_id}
             print(f"  ⚠️  CLAUDE.md not found at {source_claude_md}")
 
         # ========== .claude ディレクトリを複製 ==========
-        claude_dir = agent_dir / ".claude"
-        source_claude_dir = project_root / "agents/agent_1/.claude"
+        # 既存のエージェント固有のペルソナ設定を保持するため、
+        # 各エージェントの .claude ディレクトリから複製します
 
-        if source_claude_dir.exists():
-            if claude_dir.exists():
-                # 既存の場合は中身を更新
-                shutil.rmtree(claude_dir)
+        claude_dir = agent_dir / ".claude"
+        source_claude_dir = project_root / f"agents/agent_{i}/.claude"
+
+        if claude_dir.exists():
+            # 既存の場合はスキップ（各エージェントの固有設定を保持）
+            print(f"  ⏭️  Skipping agents/agent_{i}/.claude/ (already exists, preserving persona)")
+        elif source_claude_dir.exists():
+            # ソースが存在する場合は複製
             shutil.copytree(source_claude_dir, claude_dir)
 
             # CLAUDE.md の中身をエージェントIDに合わせて更新
@@ -3520,41 +4050,23 @@ async def setup_server():
         # ========== 3. Bot にロールを付与 ==========
         print("\n🔐 Assigning roles to bots...")
 
-        # 各 Bot のユーザー ID を取得（トークンから Bot 情報を取得）
+        # 各 Bot のユーザー ID を取得（HTTP API経由で安全に取得）
         bot_ids = {}
 
         # GM Bot
         gm_token = os.environ.get('GAME_MASTER_TOKEN')
         if gm_token and gm_token != "your_gm_bot_token_here":
-            try:
-                gm_intents = discord.Intents.default()
-                gm_client = discord.Client(intents=gm_intents)
-
-                @gm_client.event
-                async def on_ready():
-                    bot_ids['gm'] = gm_client.user.id
-                    await gm_client.close()
-
-                await gm_client.start(gm_token)
-            except Exception as e:
-                print(f"  ⚠️  GM Bot の取得に失敗: {e}")
+            gm_id = await get_bot_user_id(gm_token)
+            if gm_id:
+                bot_ids['gm'] = gm_id
 
         # Agent Bots
         for i in range(1, AGENT_COUNT + 1):
             agent_token = os.environ.get(f'AGENT_{i}_TOKEN')
             if agent_token and agent_token != f"your_agent{i}_bot_token_here":
-                try:
-                    agent_intents = discord.Intents.default()
-                    agent_client = discord.Client(intents=agent_intents)
-
-                    @agent_client.event
-                    async def on_ready():
-                        bot_ids[f'agent-{i}'] = agent_client.user.id
-                        await agent_client.close()
-
-                    await agent_client.start(agent_token)
-                except Exception as e:
-                    print(f"  ⚠️  Agent {i} の取得に失敗: {e}")
+                agent_id = await get_bot_user_id(agent_token)
+                if agent_id:
+                    bot_ids[f'agent-{i}'] = agent_id
 
         # ロールを付与
         # GM Bot
@@ -3597,7 +4109,42 @@ async def setup_server():
                 await owner_member.add_roles(owner_role)
                 print(f"  ✓ Assigned @owner to you")
 
-        # ========== 4. システムログに記録 ==========
+        # ========== 4. .env に Discord ID を保存 ==========
+        print("\n💾 Saving Discord IDs to .env...")
+
+        project_root = Path(__file__).parent.parent.parent
+        env_file = project_root / ".env"
+
+        if env_file.exists():
+            # .env ファイルを読み込んで更新
+            env_content = env_file.read_text()
+            lines = env_content.split('\n')
+
+            # 更新する行を探す
+            updated_lines = []
+            updated_keys = set()
+
+            for line in lines:
+                if '=' in line:
+                    key = line.split('=')[0]
+                    # AGENT_N_DISCORD_ID ならスキップ（後で追加する）
+                    if key.endswith('_DISCORD_ID'):
+                        updated_keys.add(key)
+                        continue
+                updated_lines.append(line)
+
+            # Discord ID を追加
+            for i in range(1, AGENT_COUNT + 1):
+                key = f'AGENT_{i}_DISCORD_ID'
+                if f'agent-{i}' in bot_ids:
+                    discord_id = bot_ids[f'agent-{i}']
+                    updated_lines.append(f'{key}={discord_id}')
+                    print(f"  ✓ {key}={discord_id}")
+
+            env_file.write_text('\n'.join(updated_lines))
+            print(f"  ✓ Saved {len([k for k in bot_ids.keys() if k.startswith('agent-')])} Discord IDs to .env")
+
+        # ========== 5. システムログに記録 ==========
         if system_log_ch:
             from datetime import datetime
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -3615,7 +4162,7 @@ async def setup_server():
             await system_log_ch.send(embed=log_embed)
             print(f"\n  📝 システムログを #system-log に送信しました")
 
-        # ========== 5. 完了 ==========
+        # ========== 6. 完了 ==========
         print("\n" + "=" * 50)
         print("✅ Server setup complete!")
         print("=" * 50)
@@ -3654,6 +4201,50 @@ def main(agent_configs, server, skip_missing_claude):
 
 if __name__ == '__main__':
     main()
+```
+
+`src/utils/__init__.py`
+
+**サイズ**: 0.0 B | **行数**: 0 行
+```python
+(Empty file)
+```
+
+`src/utils/discord_utils.py`
+
+**サイズ**: 961.0 B | **行数**: 31 行
+```python
+"""Discord utility functions."""
+
+from typing import Optional
+import aiohttp
+
+
+async def get_bot_user_id(token: str) -> Optional[int]:
+    """
+    Bot トークンからユーザー ID を取得 (HTTP API経由)
+
+    Args:
+        token: Discord Bot Token
+
+    Returns:
+        Bot User ID (取得失敗時は None)
+    """
+    url = "https://discord.com/api/v10/users/@me"
+    headers = {"Authorization": f"Bot {token}"}
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return int(data['id'])
+                else:
+                    print(f"  ⚠️ Bot ID の取得に失敗: Status {response.status}")
+                    return None
+    except Exception as e:
+        print(f"  ⚠️ Bot ID の取得中にHTTPエラーが発生: {e}")
+        return None
 ```
 
 `hooks/keep_going.py`
