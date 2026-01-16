@@ -8,6 +8,8 @@ import discord
 import asyncio
 import os
 import click
+import shutil
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -87,6 +89,85 @@ async def check_all_bots():
             print(f"  ⚠️  Agent {i}: トークンが未設定")
 
 
+def setup_agent_configs(skip_missing_claude=True):
+    """各エージェントの設定ファイルを作成
+
+    Args:
+        skip_missing_claude: .claude ディレクトリがない場合にスキップするか（デフォルト: True）
+    """
+    print("\n📝 Setting up agent configurations...")
+
+    # プロジェクトルートディレクトリ
+    project_root = Path(__file__).parent.parent.parent
+
+    for i in range(1, AGENT_COUNT + 1):
+        agent_dir = project_root / f"agents/agent_{i}"
+        agent_id = f"agent-{i}"
+
+        # ========== .env ファイルを作成 ==========
+        env_file = agent_dir / ".env"
+
+        # メインの .env から値を取得
+        guild_id = os.environ.get('GUILD_ID', 'your_guild_id_here')
+        agent_token = os.environ.get(f'AGENT_{i}_TOKEN', f'your_agent{i}_bot_token_here')
+
+        env_content = f"""# ========================================
+# Agent {i} Settings
+# ========================================
+
+# Discord Bot Token (このエージェント用)
+DISCORD_TOKEN={agent_token}
+
+# Discord Server ID
+GUILD_ID={guild_id}
+
+# エージェント ID
+AGENT_ID={agent_id}
+"""
+
+        env_file.write_text(env_content)
+        print(f"  ✓ Created agents/agent_{i}/.env")
+
+        # ========== CLAUDE.md（ルールブック）を複製 ==========
+        source_claude_md = project_root / "agents/CLAUDE.md"
+        target_claude_md = agent_dir / "CLAUDE.md"
+
+        if source_claude_md.exists():
+            content = source_claude_md.read_text()
+            # エージェントIDを置換
+            content = content.replace("${AGENT_ID}", agent_id)
+            target_claude_md.write_text(content)
+            print(f"  ✓ Created agents/agent_{i}/CLAUDE.md")
+        else:
+            print(f"  ⚠️  CLAUDE.md not found at {source_claude_md}")
+
+        # ========== .claude ディレクトリを複製 ==========
+        # （現在はスキップしています。必要な場合は有効化してください）
+        # claude_dir = agent_dir / ".claude"
+        # source_claude_dir = project_root / "agents/agent_1/.claude"
+        #
+        # if source_claude_dir.exists():
+        #     if claude_dir.exists():
+        #         # 既存の場合は中身を更新
+        #         shutil.rmtree(claude_dir)
+        #     shutil.copytree(source_claude_dir, claude_dir)
+        #
+        #     # CLAUDE.md の中身をエージェントIDに合わせて更新
+        #     claude_md = claude_dir / "CLAUDE.md"
+        #     if claude_md.exists():
+        #         content = claude_md.read_text()
+        #         # エージェントIDを置換
+        #         content = content.replace("${AGENT_ID}", agent_id)
+        #         claude_md.write_text(content)
+        #
+        #     print(f"  ✓ Created agents/agent_{i}/.claude/")
+        # else:
+        #     if skip_missing_claude:
+        #         print(f"  ⏭️  Skipping .claude directory (not found at {source_claude_dir})")
+        #     else:
+        #         print(f"  ⚠️  Source .claude directory not found at {source_claude_dir}")
+
+
 async def setup_server():
     """サーバーの初期設定を実行"""
 
@@ -139,66 +220,237 @@ async def setup_server():
         dead_role = created_roles["dead"]
         werewolf_role = created_roles["werewolf"]
 
-        # カテゴリ作成
-        game_category = await guild.create_category("🎮 人狼ゲーム")
-        dm_category = await guild.create_category("🔒 プライベートDM")
+        # カテゴリ作成（既存チェック）
+        game_category = discord.utils.get(guild.categories, name="🎮 人狼ゲーム")
+        if game_category:
+            print("  ✓ Category 🎮 人狼ゲーム already exists")
+        else:
+            game_category = await guild.create_category("🎮 人狼ゲーム")
+            print("  ✓ Created 🎮 人狼ゲーム")
+
+        dm_category = discord.utils.get(guild.categories, name="🔒 プライベートDM")
+        if dm_category:
+            print("  ✓ Category 🔒 プライベートDM already exists")
+        else:
+            dm_category = await guild.create_category("🔒 プライベートDM")
+            print("  ✓ Created 🔒 プライベートDM")
 
         # --- 公開チャンネル ---
 
         # #village
-        village = await guild.create_text_channel("village", category=game_category)
-        await village.set_permissions(everyone, read_messages=True, send_messages=False)
-        await village.set_permissions(alive_role, send_messages=True)
-        await village.set_permissions(owner_role, read_messages=True, send_messages=True)
-        await village.set_permissions(gm_role, read_messages=True, send_messages=True)
-        print("  ✓ #village")
+        village = discord.utils.get(guild.text_channels, name="village")
+        if village:
+            print("  ✓ #village already exists")
+        else:
+            village = await guild.create_text_channel("village", category=game_category)
+            await village.set_permissions(everyone, read_messages=True, send_messages=False)
+            await village.set_permissions(alive_role, send_messages=True)
+            await village.set_permissions(owner_role, read_messages=True, send_messages=True)
+            await village.set_permissions(gm_role, read_messages=True, send_messages=True)
+            print("  ✓ Created #village")
 
         # #game-log
-        log_ch = await guild.create_text_channel("game-log", category=game_category)
-        await log_ch.set_permissions(everyone, read_messages=True, send_messages=False)
-        await log_ch.set_permissions(gm_role, send_messages=True)
-        await log_ch.set_permissions(owner_role, read_messages=True)
-        print("  ✓ #game-log")
+        log_ch = discord.utils.get(guild.text_channels, name="game-log")
+        if log_ch:
+            print("  ✓ #game-log already exists")
+        else:
+            log_ch = await guild.create_text_channel("game-log", category=game_category)
+            await log_ch.set_permissions(everyone, read_messages=True, send_messages=False)
+            await log_ch.set_permissions(gm_role, send_messages=True)
+            await log_ch.set_permissions(owner_role, read_messages=True)
+            print("  ✓ Created #game-log")
+
+        # #system-log
+        system_log_ch = discord.utils.get(guild.text_channels, name="system-log")
+        if system_log_ch:
+            print("  ✓ #system-log already exists")
+        else:
+            system_log_ch = await guild.create_text_channel("system-log", category=game_category)
+            await system_log_ch.set_permissions(everyone, read_messages=False)
+            await system_log_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
+            await system_log_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
+            print("  ✓ Created #system-log")
 
         # --- 秘密チャンネル ---
 
         # #werewolf-room
-        wolf_ch = await guild.create_text_channel("werewolf-room", category=game_category)
-        await wolf_ch.set_permissions(everyone, read_messages=False)
-        await wolf_ch.set_permissions(werewolf_role, read_messages=True, send_messages=True)
-        await wolf_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
-        await wolf_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
-        print("  ✓ #werewolf-room")
+        wolf_ch = discord.utils.get(guild.text_channels, name="werewolf-room")
+        if wolf_ch:
+            print("  ✓ #werewolf-room already exists")
+        else:
+            wolf_ch = await guild.create_text_channel("werewolf-room", category=game_category)
+            await wolf_ch.set_permissions(everyone, read_messages=False)
+            await wolf_ch.set_permissions(werewolf_role, read_messages=True, send_messages=True)
+            await wolf_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
+            await wolf_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
+            print("  ✓ Created #werewolf-room")
 
         # #graveyard
-        grave_ch = await guild.create_text_channel("graveyard", category=game_category)
-        await grave_ch.set_permissions(everyone, read_messages=False)
-        await grave_ch.set_permissions(dead_role, read_messages=True, send_messages=True)
-        await grave_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
-        await grave_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
-        print("  ✓ #graveyard")
+        grave_ch = discord.utils.get(guild.text_channels, name="graveyard")
+        if grave_ch:
+            print("  ✓ #graveyard already exists")
+        else:
+            grave_ch = await guild.create_text_channel("graveyard", category=game_category)
+            await grave_ch.set_permissions(everyone, read_messages=False)
+            await grave_ch.set_permissions(dead_role, read_messages=True, send_messages=True)
+            await grave_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
+            await grave_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
+            print("  ✓ Created #graveyard")
 
         # --- DMチャンネル（各エージェント用） ---
 
         for i in range(1, AGENT_COUNT + 1):
             agent_role = created_roles[f"agent-{i}"]
-            dm_ch = await guild.create_text_channel(f"dm-agent-{i}", category=dm_category)
-            await dm_ch.set_permissions(everyone, read_messages=False)
-            await dm_ch.set_permissions(agent_role, read_messages=True, send_messages=True)
-            await dm_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
-            await dm_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
-            print(f"  ✓ #dm-agent-{i}")
+            dm_ch_name = f"dm-agent-{i}"
+            dm_ch = discord.utils.get(guild.text_channels, name=dm_ch_name)
+            if dm_ch:
+                print(f"  ✓ #{dm_ch_name} already exists")
+            else:
+                dm_ch = await guild.create_text_channel(dm_ch_name, category=dm_category)
+                await dm_ch.set_permissions(everyone, read_messages=False)
+                await dm_ch.set_permissions(agent_role, read_messages=True, send_messages=True)
+                await dm_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
+                await dm_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
+                print(f"  ✓ Created #{dm_ch_name}")
 
-        # ========== 3. 完了 ==========
+        # ========== 3. Bot にロールを付与 ==========
+        print("\n🔐 Assigning roles to bots...")
+
+        # 各 Bot のユーザー ID を取得（トークンから Bot 情報を取得）
+        bot_ids = {}
+
+        # GM Bot
+        gm_token = os.environ.get('GAME_MASTER_TOKEN')
+        if gm_token and gm_token != "your_gm_bot_token_here":
+            try:
+                gm_intents = discord.Intents.default()
+                gm_client = discord.Client(intents=gm_intents)
+
+                @gm_client.event
+                async def on_ready():
+                    bot_ids['gm'] = gm_client.user.id
+                    await gm_client.close()
+
+                await gm_client.start(gm_token)
+            except Exception as e:
+                print(f"  ⚠️  GM Bot の取得に失敗: {e}")
+
+        # Agent Bots
+        for i in range(1, AGENT_COUNT + 1):
+            agent_token = os.environ.get(f'AGENT_{i}_TOKEN')
+            if agent_token and agent_token != f"your_agent{i}_bot_token_here":
+                try:
+                    agent_intents = discord.Intents.default()
+                    agent_client = discord.Client(intents=agent_intents)
+
+                    @agent_client.event
+                    async def on_ready():
+                        bot_ids[f'agent-{i}'] = agent_client.user.id
+                        await agent_client.close()
+
+                    await agent_client.start(agent_token)
+                except Exception as e:
+                    print(f"  ⚠️  Agent {i} の取得に失敗: {e}")
+
+        # ロールを付与
+        # GM Bot
+        if 'gm' in bot_ids:
+            gm_member = guild.get_member(bot_ids['gm'])
+            if gm_member:
+                if gm_role in gm_member.roles:
+                    print(f"  ✓ GM Bot already has @game-master")
+                else:
+                    await gm_member.add_roles(gm_role)
+                    print(f"  ✓ Assigned @game-master to GM Bot")
+            else:
+                print(f"  ⚠️  GM Bot がサーバーに見つかりません")
+        else:
+            print(f"  ⚠️  GM Bot のトークンが未設定か無効です")
+
+        # Agent Bots
+        for i in range(1, AGENT_COUNT + 1):
+            agent_key = f'agent-{i}'
+            if agent_key in bot_ids:
+                agent_member = guild.get_member(bot_ids[agent_key])
+                agent_role = created_roles[agent_key]
+                if agent_member:
+                    if agent_role in agent_member.roles:
+                        print(f"  ✓ Agent {i} already has @agent-{i}")
+                    else:
+                        await agent_member.add_roles(agent_role)
+                        print(f"  ✓ Assigned @agent-{i} to Agent {i}")
+                else:
+                    print(f"  ⚠️  Agent {i} がサーバーに見つかりません")
+            else:
+                print(f"  ⚠️  Agent {i} のトークンが未設定か無効です")
+
+        # オーナー（実行者本人）に @owner を付与
+        owner_member = guild.me
+        if owner_member:
+            if owner_role in owner_member.roles:
+                print(f"  ✓ You already have @owner")
+            else:
+                await owner_member.add_roles(owner_role)
+                print(f"  ✓ Assigned @owner to you")
+
+        # ========== 4. .env に Discord ID を保存 ==========
+        print("\n💾 Saving Discord IDs to .env...")
+
+        project_root = Path(__file__).parent.parent.parent
+        env_file = project_root / ".env"
+
+        if env_file.exists():
+            # .env ファイルを読み込んで更新
+            env_content = env_file.read_text()
+            lines = env_content.split('\n')
+
+            # 更新する行を探す
+            updated_lines = []
+            updated_keys = set()
+
+            for line in lines:
+                if '=' in line:
+                    key = line.split('=')[0]
+                    # AGENT_N_DISCORD_ID ならスキップ（後で追加する）
+                    if key.endswith('_DISCORD_ID'):
+                        updated_keys.add(key)
+                        continue
+                updated_lines.append(line)
+
+            # Discord ID を追加
+            for i in range(1, AGENT_COUNT + 1):
+                key = f'AGENT_{i}_DISCORD_ID'
+                if f'agent-{i}' in bot_ids:
+                    discord_id = bot_ids[f'agent-{i}']
+                    updated_lines.append(f'{key}={discord_id}')
+                    print(f"  ✓ {key}={discord_id}")
+
+            env_file.write_text('\n'.join(updated_lines))
+            print(f"  ✓ Saved {len([k for k in bot_ids.keys() if k.startswith('agent-')])} Discord IDs to .env")
+
+        # ========== 5. システムログに記録 ==========
+        if system_log_ch:
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            log_embed = discord.Embed(
+                title="🔧 サーバーセットアップ完了",
+                color=discord.Color.green(),
+                timestamp=datetime.now()
+            )
+            log_embed.add_field(name="実行時刻", value=timestamp, inline=False)
+            log_embed.add_field(name="GM Bot", value="✅ ロール付与済み" if 'gm' in bot_ids else "⚠️ 未設定", inline=True)
+            log_embed.add_field(name="Agent Bots", value=f"✅ {len([k for k in bot_ids.keys() if k.startswith('agent-')])}/{AGENT_COUNT} 準備完了", inline=True)
+            log_embed.add_field(name="Owner", value="✅ ロール付与済み", inline=True)
+
+            await system_log_ch.send(embed=log_embed)
+            print(f"\n  📝 システムログを #system-log に送信しました")
+
+        # ========== 6. 完了 ==========
         print("\n" + "=" * 50)
         print("✅ Server setup complete!")
         print("=" * 50)
-        print("\n次のステップ:")
-        print("  1. Discord Developer Portal で 6つの Bot を作成")
-        print("  2. 各 Bot をサーバーに招待")
-        print("  3. 各 Bot に対応する @agent-N ロールを付与")
-        print("  4. GM Bot に @game-master ロールを付与")
-        print("  5. 自分に @owner ロールを付与")
+        print("\n🎮 準備完了！これでゲームを開始できます")
 
         await client.close()
 
@@ -206,9 +458,29 @@ async def setup_server():
 
 
 @click.command()
-def main():
-    """Discord サーバーの初期設定を実行"""
-    asyncio.run(setup_server())
+@click.option('--agent-configs/--no-agent-configs', default=True, help='エージェント設定ファイルのセットアップを実行するか（デフォルト: 実行）')
+@click.option('--server/--no-server', default=True, help='Discord サーバーのセットアップを実行するか（デフォルト: 実行）')
+@click.option('--skip-missing-claude/--fail-missing-claude', default=True, help='.claude ディレクトリがない場合にスキップするか（デフォルト: スキップ）')
+def main(agent_configs, server, skip_missing_claude):
+    """Discord サーバーの初期設定を実行
+
+    \b
+    例:
+        uv run werewolf-setup              # すべて実行
+        uv run werewolf-setup --no-server  # エージェント設定のみ
+        uv run werewolf-setup --no-agent-configs  # サーバーセットアップのみ
+    """
+    # エージェント設定ファイルを作成
+    if agent_configs:
+        setup_agent_configs(skip_missing_claude=skip_missing_claude)
+    else:
+        print("⏭️  Skipping agent configurations")
+
+    # サーバーセットアップ
+    if server:
+        asyncio.run(setup_server())
+    else:
+        print("⏭️  Skipping server setup")
 
 
 if __name__ == '__main__':
