@@ -217,6 +217,8 @@ async def setup_server():
             ("alive", discord.Color.green(), discord.Permissions(send_messages=True)),
             ("dead", discord.Color.dark_gray(), discord.Permissions()),
             ("werewolf", discord.Color.red(), discord.Permissions()),
+            ("seer", discord.Color.blue(), discord.Permissions()),
+            ("knight", discord.Color.from_rgb(0, 255, 0), discord.Permissions()),  # 緑
         ]
 
         # エージェント個別ロール
@@ -308,6 +310,30 @@ async def setup_server():
             await wolf_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
             await wolf_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
             print("  ✓ Created #werewolf-room")
+
+        # #seer-room (占い師専用)
+        seer_ch = discord.utils.get(guild.text_channels, name="seer-room")
+        if seer_ch:
+            print("  ✓ #seer-room already exists")
+        else:
+            seer_ch = await guild.create_text_channel("seer-room", category=game_category)
+            await seer_ch.set_permissions(everyone, read_messages=False)
+            await seer_ch.set_permissions(created_roles["seer"], read_messages=True, send_messages=True)
+            await seer_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
+            await seer_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
+            print("  ✓ Created #seer-room")
+
+        # #knight-room (騎士専用)
+        knight_ch = discord.utils.get(guild.text_channels, name="knight-room")
+        if knight_ch:
+            print("  ✓ #knight-room already exists")
+        else:
+            knight_ch = await guild.create_text_channel("knight-room", category=game_category)
+            await knight_ch.set_permissions(everyone, read_messages=False)
+            await knight_ch.set_permissions(created_roles["knight"], read_messages=True, send_messages=True)
+            await knight_ch.set_permissions(owner_role, read_messages=True, send_messages=True)
+            await knight_ch.set_permissions(gm_role, read_messages=True, send_messages=True)
+            print("  ✓ Created #knight-room")
 
         # #graveyard
         grave_ch = discord.utils.get(guild.text_channels, name="graveyard")

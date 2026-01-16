@@ -51,6 +51,26 @@ class ChannelManager:
             if member:
                 await member.add_roles(werewolf_role)
 
+    async def set_seer_role(self, agent_id: str):
+        """占い師ロールを付与"""
+        seer_role = self.get_role("seer")
+        if not seer_role:
+            return
+
+        member = discord.utils.get(self.guild.members, name=agent_id)
+        if member:
+            await member.add_roles(seer_role)
+
+    async def set_knight_role(self, agent_id: str):
+        """騎士ロールを付与"""
+        knight_role = self.get_role("knight")
+        if not knight_role:
+            return
+
+        member = discord.utils.get(self.guild.members, name=agent_id)
+        if member:
+            await member.add_roles(knight_role)
+
     async def start_game(self, player_discord_ids: List[int]):
         """ゲーム開始時の設定"""
         alive_role = self.get_role("alive")

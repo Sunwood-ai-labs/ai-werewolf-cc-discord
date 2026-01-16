@@ -278,10 +278,11 @@ def channels():
 
 @cli.command()
 def whoami():
-    """🎭 自分の状態を確認（見えるチャンネルから役職を推測）"""
+    """🎭 自分の状態を確認（実際の役職をDMから取得）"""
 
     async def _whoami():
         intents = discord.Intents.default()
+        intents.message_content = True
         client = discord.Client(intents=intents)
 
         @client.event
@@ -294,17 +295,69 @@ def whoami():
             console.print(f"  Discord名: {me.display_name}")
             console.print(f"  ロール: {', '.join([r.name for r in me.roles if r.name != '@everyone'])}")
 
-            # 役職推測
-            visible_channels = [ch.name for ch in guild.text_channels
-                              if ch.permissions_for(me).read_messages]
+            # DMチャンネルから役職情報を取得
+            dm_channel = discord.utils.get(guild.text_channels, name=f"dm-{AGENT_ID}")
 
-            console.print(f"\n[bold]🔍 役職推測:[/bold]")
-            if "werewolf-room" in visible_channels:
-                console.print("  [red]🐺 あなたは人狼です！[/red]")
-            elif "graveyard" in visible_channels and "village" in visible_channels:
-                console.print("  [dim]👻 あなたは死亡しています[/dim]")
+            if dm_channel:
+                # 最新のメッセージを取得して役職を特定
+                messages = []
+                async for msg in dm_channel.history(limit=50):
+                    messages.append(msg)
+
+                # 役職を特定
+                role_found = False
+                for msg in reversed(messages):
+                    content = msg.content
+
+                    # GMからの役職通知を検出
+                    if "あなたは" in content and "です" in content:
+                        # 役職が見つかった
+                        if "占い師" in content:
+                            console.print(f"\n[bold]🎭 あなたの役職:[/bold]")
+                            console.print("  [blue]👁️ 占い師[/blue]")
+                            role_found = True
+                            break
+                        elif "人狼" in content:
+                            console.print(f"\n[bold]🎭 あなたの役職:[/bold]")
+                            console.print("  [red]🐺 人狼[/red]")
+                            role_found = True
+                            break
+                        elif "騎士" in content:
+                            console.print(f"\n[bold]🎭 あなたの役職:[/bold]")
+                            console.print("  [green]🛡️ 騎士[/green]")
+                            role_found = True
+                            break
+                        elif "村人" in content:
+                            console.print(f"\n[bold]🎭 あなたの役職:[/bold]")
+                            console.print("  [green]👤 村人[/green]")
+                            role_found = True
+                            break
+
+                if role_found:
+                    # 生存状態を確認
+                    visible_channels = [ch.name for ch in guild.text_channels
+                                      if ch.permissions_for(me).read_messages]
+
+                    if "graveyard" in visible_channels:
+                        console.print(f"\n[bold]📊 状態:[/bold]")
+                        console.print("  [dim]👻 死亡中[/dim]")
+                    else:
+                        console.print(f"\n[bold]📊 状態:[/bold]")
+                        console.print("  [green]✓ 生存中[/green]")
+                else:
+                    # 役職が見つからない場合は推測モード
+                    visible_channels = [ch.name for ch in guild.text_channels
+                                      if ch.permissions_for(me).read_messages]
+
+                    console.print(f"\n[bold]🔍 役職推測（DMから取得できませんでした）:[/bold]")
+                    if "werewolf-room" in visible_channels:
+                        console.print("  [red]🐺 あなたは人狼です！[/red]")
+                    elif "graveyard" in visible_channels and "village" in visible_channels:
+                        console.print("  [dim]👻 あなたは死亡しています[/dim]")
+                    else:
+                        console.print("  [green]👤 あなたは村人陣営です[/green]")
             else:
-                console.print("  [green]👤 あなたは村人陣営です[/green]")
+                console.print(f"\n[yellow]⚠️ DMチャンネルが見つかりません[/yellow]")
 
             await client.close()
 

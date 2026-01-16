@@ -136,7 +136,7 @@ class GameMasterBot(discord.Client):
         # ゲームを自動開始
         agent_ids = [f"agent-{i}" for i in range(1, AGENT_COUNT + 1)]
         log_with_timestamp(f"✓ ゲームを開始します: {', '.join(agent_ids)}")
-        success = await self.start_game(agent_ids)
+        success = await self.start_game(agent_ids, guild)
 
         if success:
             log_with_timestamp("✓ ゲームが正常に開始されました")
@@ -342,7 +342,7 @@ class GameMasterBot(discord.Client):
 
     # ========== ゲーム管理コマンド ==========
 
-    async def start_game(self, agent_ids: list[str]):
+    async def start_game(self, agent_ids: list[str], guild: discord.Guild):
         """ゲームを開始"""
         if self.game_state.phase != Phase.SETUP:
             return False
@@ -424,8 +424,29 @@ class GameMasterBot(discord.Client):
         werewolves = self.game_state.get_players_by_role(Role.WEREWOLF)
         await self.channel_manager.set_werewolf_role([p.agent_id for p in werewolves])
 
-        # 全プレイヤーに alive ロールを付与（villageチャンネルの書き込み権限のため）
-        await self.channel_manager.start_game(list(self.agent_discord_ids.values()))
+        # 占い師に権限を付与
+        seers = self.game_state.get_players_by_role(Role.SEER)
+        for seer in seers:
+            await self.channel_manager.set_seer_role(seer.agent_id)
+
+        # 騎士に権限を付与
+        knights = self.game_state.get_players_by_role(Role.KNIGHT)
+        for knight in knights:
+            await self.channel_manager.set_knight_role(knight.agent_id)
+
+        # 全プレイヤーの dead ロールを剥奪してから alive ロールを付与
+        # （前のゲームのロールが残っている場合の対策）
+        for discord_id in self.agent_discord_ids.values():
+            member = guild.get_member(discord_id)
+            if member:
+                # dead ロールを剥奪（あれば）
+                dead_role = self.channel_manager.get_role("dead")
+                if dead_role and dead_role in member.roles:
+                    await member.remove_roles(dead_role)
+                # alive ロールを付与
+                alive_role = self.channel_manager.get_role("alive")
+                if alive_role:
+                    await member.add_roles(alive_role)
 
         # ゲーム回数を表示（履歴管理）
         game_count_prefix = f"【第{GAME_COUNT}回】"
